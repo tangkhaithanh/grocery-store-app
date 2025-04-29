@@ -7,8 +7,12 @@ import com.store.grocery_store_app.data.models.request.OtpVerifyRequest
 import com.store.grocery_store_app.data.models.request.RegisterRequest
 import com.store.grocery_store_app.data.models.response.ApiResponse
 import com.store.grocery_store_app.data.models.response.AuthResponse
+import com.store.grocery_store_app.data.models.response.CategoryResponse
+import com.store.grocery_store_app.data.models.response.PagedResponse
+import com.store.grocery_store_app.data.models.response.ProductResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -30,4 +34,16 @@ interface ApiService {
 
     @POST("otp/verify")
     suspend fun verifyOtp(@Body request: OtpVerifyRequest): Response<ApiResponse<Any>>
+
+    @GET("categories")
+    suspend fun getCategories(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 100
+    ): Response<ApiResponse<PagedResponse<CategoryResponse>>>
+
+    @GET("product/best-seller")
+    suspend fun getBestSellerProducts(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): Response<ApiResponse<PagedResponse<ProductResponse>>>
 }

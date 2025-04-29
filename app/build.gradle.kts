@@ -102,4 +102,10 @@ dependencies {
     implementation("com.google.android.material:material:1.6.0")
 
     implementation("androidx.multidex:multidex:2.0.1")
+
+    // Glide for Compose
+    implementation ("com.github.bumptech.glide:compose:1.0.0-alpha.5")
+
+// Coil for Compose (alternative to Glide)
+    implementation ("io.coil-kt:coil-compose:2.4.0")
 }

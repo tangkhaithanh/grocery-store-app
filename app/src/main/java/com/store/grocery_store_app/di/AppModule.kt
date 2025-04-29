@@ -5,7 +5,11 @@ import com.store.grocery_store_app.data.api.ApiService
 import com.store.grocery_store_app.data.api.AuthInterceptor
 import com.store.grocery_store_app.data.local.TokenManager
 import com.store.grocery_store_app.data.repository.AuthRepository
+import com.store.grocery_store_app.data.repository.CategoryRepository
+import com.store.grocery_store_app.data.repository.ProductRepository
 import com.store.grocery_store_app.data.repository.impl.AuthRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.CategoryRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.ProductRepositoryImpl
 import com.store.grocery_store_app.utils.Constants
 import dagger.Module
 import dagger.Provides
@@ -70,5 +74,18 @@ object AppModule {
     @Singleton
     fun provideAuthRepository(apiService: ApiService, tokenManager: TokenManager): AuthRepository {
         return AuthRepositoryImpl(apiService, tokenManager)
+    }
+
+    // Thêm provider cho CategoryRepository
+    @Provides
+    @Singleton
+    fun provideCategoryRepository(apiService: ApiService): CategoryRepository {
+        return CategoryRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideProductRepository(apiService: ApiService): ProductRepository {
+        return ProductRepositoryImpl(apiService)
     }
 }
