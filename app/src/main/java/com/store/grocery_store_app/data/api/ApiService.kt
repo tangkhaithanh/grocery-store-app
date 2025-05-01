@@ -1,5 +1,6 @@
 package com.store.grocery_store_app.data.api
 
+import com.store.grocery_store_app.data.models.StatusOrderType
 import com.store.grocery_store_app.data.models.request.AuthRequest
 import com.store.grocery_store_app.data.models.request.ForgotPasswordRequest
 import com.store.grocery_store_app.data.models.request.OtpRequest
@@ -8,6 +9,7 @@ import com.store.grocery_store_app.data.models.request.RegisterRequest
 import com.store.grocery_store_app.data.models.response.ApiResponse
 import com.store.grocery_store_app.data.models.response.AuthResponse
 import com.store.grocery_store_app.data.models.response.CategoryResponse
+import com.store.grocery_store_app.data.models.response.OrderResponse
 import com.store.grocery_store_app.data.models.response.PagedResponse
 import com.store.grocery_store_app.data.models.response.ProductResponse
 import retrofit2.Response
@@ -46,4 +48,11 @@ interface ApiService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20
     ): Response<ApiResponse<PagedResponse<ProductResponse>>>
+
+    @GET("orders")
+    suspend fun getOrders(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20,
+        @Query("typeStatusOrder") typeStatusOrder: StatusOrderType = StatusOrderType.ALL
+    ) : Response<ApiResponse<PagedResponse<OrderResponse>>>
 }

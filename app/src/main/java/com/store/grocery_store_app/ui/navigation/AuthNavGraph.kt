@@ -16,6 +16,7 @@ import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
 import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
+import com.store.grocery_store_app.ui.screens.order.OrderScreen
 import com.store.grocery_store_app.utils.AuthPurpose
 
 @Composable
@@ -180,6 +181,21 @@ fun AuthNavGraph(
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                },
+                onNavigateToOrder = {
+                    navController.navigate(Screen.Order.route) {
+                        popUpTo(Screen.Order.route) { inclusive = true}
+                    }
+                }
+            )
+        }
+
+        composable(route = Screen.Order.route) {
+            OrderScreen(
+                onHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true}
                     }
                 }
             )

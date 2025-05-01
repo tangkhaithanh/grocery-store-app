@@ -30,7 +30,7 @@ import com.store.grocery_store_app.R
 
 @Composable
 fun BottomNavigation(
-    onFabClick: () -> Unit = {},
+    onFabClick: () -> Unit,
     notificationCount: Int = 0
 ) {
     var selectedIndex by remember { mutableStateOf(0) }
@@ -182,5 +182,5 @@ fun BottomNavItem(
 @Composable
 @Preview(showBackground = true)
 fun BottomNavigationPreview() {
-    BottomNavigation(notificationCount = 10)
+    BottomNavigation({},notificationCount = 10)
 }

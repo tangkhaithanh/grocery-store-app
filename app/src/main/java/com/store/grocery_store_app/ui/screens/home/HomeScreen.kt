@@ -26,8 +26,9 @@ fun HomeScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     categoryViewModel: CategoryViewModel = hiltViewModel(),
     productViewModel: ProductViewModel = hiltViewModel(), // Thêm ProductViewModel
+    onNavigateToOrder: () -> Unit,
 
-) {
+    ) {
     val authState by authViewModel.authState.collectAsState()
     val scrollState = rememberScrollState()
     val categoryState by categoryViewModel.state.collectAsState()
@@ -39,7 +40,10 @@ fun HomeScreen(
 
     Scaffold(
         bottomBar = {
-            BottomNavigation(notificationCount = 10)
+            BottomNavigation(
+                { onNavigateToOrder() },
+                notificationCount = 10
+            )
         }
     ) { paddingValues ->
         Box(
