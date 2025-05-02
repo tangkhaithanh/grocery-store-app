@@ -81,7 +81,6 @@ fun OrderScreen(
                         sellPrice = orderItem.product.price,
                         buyPrice = orderItem.price,
                         totalAmount = (orderItem.price * orderItem.quantity.toBigDecimal()).toInt(),
-                        orderItem.reviewed,
                         orderItem.canReview
                     )
                 )

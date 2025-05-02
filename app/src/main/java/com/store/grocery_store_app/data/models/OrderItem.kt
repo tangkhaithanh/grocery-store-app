@@ -12,6 +12,5 @@ data class OrderItem(
     val sellPrice: BigDecimal?,
     val buyPrice: BigDecimal,
     val totalAmount: Int,
-    val reviewed : Boolean,
     val canReview : Boolean
 )

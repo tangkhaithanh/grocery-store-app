@@ -112,7 +112,7 @@ fun OrderItemCard(order: OrderItem) {
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (order.canReview == true) {
+                if (order.canReview == false) {
                     // Nút: Xem đánh giá
                     OutlinedButton(
                         onClick = { /* TODO: Review */ },
