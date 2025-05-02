@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -108,12 +112,41 @@ fun OrderItemCard(order: OrderItem) {
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedButton(onClick = { /* TODO: Review */ }) {
-                    Text("Xem đánh giá")
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = { /* TODO: Buy again */ }) {
-                    Text("Mua lại")
+                if (order.canReview == true) {
+                    // Nút: Xem đánh giá
+                    OutlinedButton(
+                        onClick = { /* TODO: Review */ },
+                    ) {
+                        Text("Xem đánh giá")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Nút: Mua lại
+                    Button(
+                        onClick = { /* TODO: Buy again */ }
+                    ) {
+                        Text("Mua lại")
+                    }
+                } else {
+                    // Nút: Đánh giá nổi bật
+                    Button(
+                        onClick = { /* TODO: Review */ },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2196F3), // Màu xanh nổi bật
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(20.dp),
+
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Đánh giá",
+                            tint = Color.Yellow
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Đánh giá")
+                    }
                 }
             }
         }

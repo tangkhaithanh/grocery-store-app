@@ -80,7 +80,9 @@ fun OrderScreen(
                         quantity = orderItem.quantity,
                         sellPrice = orderItem.product.price,
                         buyPrice = orderItem.price,
-                        totalAmount = (orderItem.price * orderItem.quantity.toBigDecimal()).toInt()
+                        totalAmount = (orderItem.price * orderItem.quantity.toBigDecimal()).toInt(),
+                        orderItem.reviewed,
+                        orderItem.canReview
                     )
                 )
             }
@@ -146,6 +148,7 @@ fun OrderScreen(
                 sampleOrders.isNotEmpty() -> {
                     // Categories row with adjusted spacing
                     if (isDelivered) {
+
                         items(sampleOrders) { order ->
                             OrderItemCard(order)
                             Spacer(modifier = Modifier.height(8.dp))
