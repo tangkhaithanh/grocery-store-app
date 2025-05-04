@@ -26,7 +26,6 @@ fun AuthNavGraph(
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
 
-
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -35,14 +34,10 @@ fun AuthNavGraph(
         composable(route = Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = {
-                    navController.navigate(
-                        Screen.EmailVerification.createRoute(AuthPurpose.REGISTRATION)
-                    )
+                    navController.navigate(Screen.EmailVerification.createRoute(AuthPurpose.REGISTRATION))
                 },
                 onNavigateToForgotPassword = {
-                    navController.navigate(
-                        Screen.EmailVerification.createRoute(AuthPurpose.PASSWORD_RESET)
-                    )
+                    navController.navigate(Screen.EmailVerification.createRoute(AuthPurpose.PASSWORD_RESET))
                 },
                 onLoginSuccess = {
                     navController.navigate(Screen.Home.route) {
@@ -55,11 +50,7 @@ fun AuthNavGraph(
         // Email Verification Screen
         composable(
             route = Screen.EmailVerification.route,
-            arguments = listOf(
-                navArgument("purpose") {
-                    type = NavType.StringType
-                }
-            )
+            arguments = listOf(navArgument("purpose") { type = NavType.StringType })
         ) { backStackEntry ->
             val purpose = backStackEntry.arguments?.getString("purpose")?.let {
                 AuthPurpose.valueOf(it)
@@ -68,9 +59,7 @@ fun AuthNavGraph(
             EmailVerificationScreen(
                 purpose = purpose,
                 onNavigateToOtp = { email ->
-                    navController.navigate(
-                        Screen.OtpVerification.createRoute(purpose, email)
-                    )
+                    navController.navigate(Screen.OtpVerification.createRoute(purpose, email))
                 },
                 onBack = {
                     navController.popBackStack()
@@ -82,12 +71,8 @@ fun AuthNavGraph(
         composable(
             route = Screen.OtpVerification.route,
             arguments = listOf(
-                navArgument("purpose") {
-                    type = NavType.StringType
-                },
-                navArgument("email") {
-                    type = NavType.StringType
-                }
+                navArgument("purpose") { type = NavType.StringType },
+                navArgument("email") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             val purpose = backStackEntry.arguments?.getString("purpose")?.let {
@@ -101,14 +86,11 @@ fun AuthNavGraph(
                 onVerificationSuccess = {
                     when (purpose) {
                         AuthPurpose.REGISTRATION -> {
-                            navController.navigate(
-                                Screen.Register.createRoute(email)
-                            )
+                            navController.navigate(Screen.Register.createRoute(email))
                         }
+
                         AuthPurpose.PASSWORD_RESET -> {
-                            navController.navigate(
-                                Screen.ResetPassword.createRoute(email)
-                            )
+                            navController.navigate(Screen.ResetPassword.createRoute(email))
                         }
                     }
                 },
@@ -121,14 +103,9 @@ fun AuthNavGraph(
         // Register Screen
         composable(
             route = Screen.Register.route,
-            arguments = listOf(
-                navArgument("email") {
-                    type = NavType.StringType
-                }
-            )
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
         ) { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: ""
-
             RegisterScreen(
                 email = email,
                 onRegistrationSuccess = {
@@ -145,14 +122,9 @@ fun AuthNavGraph(
         // Reset Password Screen
         composable(
             route = Screen.ResetPassword.route,
-            arguments = listOf(
-                navArgument("email") {
-                    type = NavType.StringType
-                }
-            )
+            arguments = listOf(navArgument("email") { type = NavType.StringType })
         ) { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: ""
-
             ResetPasswordScreen(
                 email = email,
                 onResetSuccess = {
@@ -183,17 +155,18 @@ fun AuthNavGraph(
             )
         }
 
+        // Order Screen
         composable(route = Screen.Order.route) {
             OrderScreen(
                 onHome = {
                     navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true}
+                        popUpTo(Screen.Home.route) { inclusive = true }
                     }
                 }
             )
         }
 
-<<<<<<< HEAD
+        // Splash Screen
         composable(route = Screen.Splash.route) {
             SplashScreen(
                 onIntro = {
@@ -204,6 +177,7 @@ fun AuthNavGraph(
             )
         }
 
+        // Intro Screen
         composable(route = Screen.Intro.route) {
             IntroScreen(
                 authViewModel,
@@ -216,15 +190,14 @@ fun AuthNavGraph(
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
-=======
-
-        composable(
-            route = Screen.ProductDetails.route,
-            arguments = listOf(
-                navArgument("productId") {
-                    type = NavType.LongType
                 }
             )
+        }
+
+        // Product Details Screen
+        composable(
+            route = Screen.ProductDetails.route,
+            arguments = listOf(navArgument("productId") { type = NavType.LongType })
         ) { backStackEntry ->
             val productId = backStackEntry.arguments?.getLong("productId") ?: 0L
 
@@ -234,28 +207,14 @@ fun AuthNavGraph(
                     navController.popBackStack()
                 },
                 onAddToCartSuccess = {
-                    // Show a snackbar or toast for successful cart addition
-                    // For now, just go back to the previous screen
                     navController.popBackStack()
                 },
                 onNavigateToProduct = { newProductId ->
-                    // Điều hướng đến trang chi tiết sản phẩm mới
-                    // Thay vì sử dụng popBackStack, chúng ta điều hướng đến sản phẩm mới
-
-                    // Cách 1: Sử dụng navigate và thay thế current destination
                     navController.navigate(Screen.ProductDetails.createRoute(newProductId)) {
-                        // Xóa destination hiện tại khỏi back stack để tránh việc stack quá nhiều
-                        // khi người dùng liên tục chọn sản phẩm tương tự
                         popUpTo(navController.currentBackStackEntry?.destination?.route ?: "") {
-                            // Xóa màn hình chi tiết sản phẩm hiện tại
                             inclusive = true
                         }
                     }
-
-                    // Cách 2 (thay thế): Pop và push
-                    // navController.popBackStack()
-                    // navController.navigate(Screen.ProductDetails.createRoute(newProductId))
->>>>>>> remotes/origin/dev_thanh
                 }
             )
         }

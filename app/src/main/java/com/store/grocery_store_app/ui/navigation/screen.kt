@@ -1,4 +1,5 @@
 package com.store.grocery_store_app.ui.navigation
+
 import com.store.grocery_store_app.utils.AuthPurpose
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -35,13 +36,11 @@ sealed class Screen(val route: String) {
 
     object Order : Screen("order")
 
-<<<<<<< HEAD
     object Splash : Screen("splash")
 
     object Intro : Screen("intro")
-=======
+
     object ProductDetails : Screen("product_details/{productId}") {
         fun createRoute(productId: Long): String = "product_details/$productId"
     }
->>>>>>> remotes/origin/dev_thanh
 }
