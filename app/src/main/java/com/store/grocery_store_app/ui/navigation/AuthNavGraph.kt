@@ -15,6 +15,7 @@ import com.store.grocery_store_app.ui.screens.register.RegisterScreen
 import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
 import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.navigation.Screen
+import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
 import com.store.grocery_store_app.ui.screens.order.OrderScreen
 import com.store.grocery_store_app.utils.AuthPurpose
@@ -183,10 +184,11 @@ fun AuthNavGraph(
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
                 },
+                onNavigateToProductDetails = { productId ->
+                    navController.navigate(Screen.ProductDetails.createRoute(productId))
+                },
                 onNavigateToOrder = {
-                    navController.navigate(Screen.Order.route) {
-                        popUpTo(Screen.Order.route) { inclusive = true}
-                    }
+                    navController.navigate(Screen.Order.route)
                 }
             )
         }
@@ -197,6 +199,48 @@ fun AuthNavGraph(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = true}
                     }
+                }
+            )
+        }
+
+
+        composable(
+            route = Screen.ProductDetails.route,
+            arguments = listOf(
+                navArgument("productId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getLong("productId") ?: 0L
+
+            ProductDetailsScreen(
+                productId = productId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onAddToCartSuccess = {
+                    // Show a snackbar or toast for successful cart addition
+                    // For now, just go back to the previous screen
+                    navController.popBackStack()
+                },
+                onNavigateToProduct = { newProductId ->
+                    // Điều hướng đến trang chi tiết sản phẩm mới
+                    // Thay vì sử dụng popBackStack, chúng ta điều hướng đến sản phẩm mới
+
+                    // Cách 1: Sử dụng navigate và thay thế current destination
+                    navController.navigate(Screen.ProductDetails.createRoute(newProductId)) {
+                        // Xóa destination hiện tại khỏi back stack để tránh việc stack quá nhiều
+                        // khi người dùng liên tục chọn sản phẩm tương tự
+                        popUpTo(navController.currentBackStackEntry?.destination?.route ?: "") {
+                            // Xóa màn hình chi tiết sản phẩm hiện tại
+                            inclusive = true
+                        }
+                    }
+
+                    // Cách 2 (thay thế): Pop và push
+                    // navController.popBackStack()
+                    // navController.navigate(Screen.ProductDetails.createRoute(newProductId))
                 }
             )
         }

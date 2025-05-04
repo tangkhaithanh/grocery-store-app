@@ -1,7 +1,6 @@
 package com.store.grocery_store_app.data.models.response
 
 import java.math.BigDecimal
-import java.time.LocalDateTime
 
 data class ProductResponse (
     val id: Long,
@@ -12,6 +11,7 @@ data class ProductResponse (
     val status: String,
     val createdAt: String,
     val updatedAt: String,
+    val categoryId: Long,
     val categoryName: String,
     val categoryImage: String,
     val imageUrls: List<String>,

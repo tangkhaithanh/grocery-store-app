@@ -6,12 +6,16 @@ import com.store.grocery_store_app.data.api.AuthInterceptor
 import com.store.grocery_store_app.data.local.TokenManager
 import com.store.grocery_store_app.data.repository.AuthRepository
 import com.store.grocery_store_app.data.repository.CategoryRepository
+import com.store.grocery_store_app.data.repository.FavoriteProductRepository
 import com.store.grocery_store_app.data.repository.OrderRepository
 import com.store.grocery_store_app.data.repository.ProductRepository
+import com.store.grocery_store_app.data.repository.ReviewRepository
 import com.store.grocery_store_app.data.repository.impl.AuthRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CategoryRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.FavoriteProductRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.OrderRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.ProductRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.ReviewRepositoryImpl
 import com.store.grocery_store_app.utils.Constants
 import dagger.Module
 import dagger.Provides
@@ -95,5 +99,19 @@ object AppModule {
     @Singleton
     fun provideOrderRepository(apiService: ApiService): OrderRepository {
         return OrderRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFavouriteRepository(
+        apiService: ApiService
+    ): FavoriteProductRepository {
+        return FavoriteProductRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideReviewRepository(apiService: ApiService): ReviewRepository {
+        return ReviewRepositoryImpl(apiService)
     }
 }

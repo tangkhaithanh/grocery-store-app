@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.store.grocery_store_app.data.models.response.ProductResponse
+import com.store.grocery_store_app.ui.screens.FavoriteProduct.FavoriteProductViewModel
 import com.store.grocery_store_app.ui.theme.DeepTeal
 
 /**
@@ -43,6 +44,7 @@ fun ProductSection(
     products: List<ProductResponse>,
     isLoading: Boolean = false,
     error: String? = null,
+    favouriteViewModel: FavoriteProductViewModel,
     onSeeMoreClick: () -> Unit = {},
     onProductClick: (Long) -> Unit = {},
     onAddToCartClick: (ProductResponse) -> Unit = {}
@@ -146,6 +148,7 @@ fun ProductSection(
                 items(products) { product ->
                     ProductCard(
                         product = product,
+                        favouriteViewModel = favouriteViewModel, // Truyền favouriteViewModel
                         onProductClick = { onProductClick(product.id) },
                         onAddToCartClick = { onAddToCartClick(product) }
                     )

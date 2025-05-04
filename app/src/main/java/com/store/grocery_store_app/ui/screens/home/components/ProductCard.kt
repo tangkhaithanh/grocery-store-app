@@ -1,8 +1,15 @@
 package com.store.grocery_store_app.ui.screens.home.components
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.store.grocery_store_app.data.models.response.ProductResponse
+import com.store.grocery_store_app.ui.screens.FavoriteProduct.FavoriteProductViewModel
 import com.store.grocery_store_app.ui.theme.DeepTeal
 import com.store.grocery_store_app.ui.theme.IconBread
 import com.store.grocery_store_app.ui.theme.IconCleaner
@@ -15,6 +22,7 @@ import java.util.Locale
 @Composable
 fun ProductCard(
     product: ProductResponse,
+    favouriteViewModel: FavoriteProductViewModel = hiltViewModel(),
     onProductClick: () -> Unit,
     onAddToCartClick: () -> Unit = {}
 ) {
@@ -28,6 +36,37 @@ fun ProductCard(
 
     // Determine if product should have "Bán chạy" badge
     val bestSellerBadge = if (product.soldCount > 100) "Bán chạy" else null
+
+    // Thu thập trạng thái yêu thích từ ViewModel
+    val isFavourite by favouriteViewModel.isFavourite(product.id)
+        .collectAsState(initial = false)
+
+    // Thu thập trạng thái chung từ ViewModel
+    val favouriteState by favouriteViewModel.state.collectAsState()
+
+    // Đặt LaunchedEffect ở cấp Composable, không phải trong câu lệnh if
+    if (favouriteState.showLoginRequired) {
+        val context = LocalContext.current
+        LaunchedEffect(true) {
+            Toast.makeText(
+                context,
+                "Vui lòng đăng nhập để thêm sản phẩm vào yêu thích",
+                Toast.LENGTH_SHORT
+            ).show()
+            favouriteViewModel.clearLoginRequiredMessage()
+        }
+    }
+
+    favouriteState.error?.let { error ->
+        val context = LocalContext.current
+        LaunchedEffect(error) {
+            Toast.makeText(
+                context,
+                error,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
     // Use our reusable product card component
     CustomProductCard(
@@ -45,6 +84,10 @@ fun ProductCard(
         discountPercentage = discountPercentage,
         addToCartButtonColor = DeepTeal,
         priceColor = DeepTeal,
+        isFavourite = isFavourite,
+        onFavouriteClick = {
+            favouriteViewModel.toggleFavourite(product.id)
+        },
         currencyLocale = Locale("vi", "VN"),
         onProductClick = onProductClick,
         onAddToCartClick = onAddToCartClick
