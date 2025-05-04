@@ -12,10 +12,14 @@ import com.store.grocery_store_app.data.models.response.CategoryResponse
 import com.store.grocery_store_app.data.models.response.OrderResponse
 import com.store.grocery_store_app.data.models.response.PagedResponse
 import com.store.grocery_store_app.data.models.response.ProductResponse
+import com.store.grocery_store_app.data.models.response.ReviewResponse
+import com.store.grocery_store_app.data.models.response.ReviewStatsResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -55,4 +59,43 @@ interface ApiService {
         @Query("size") size: Int = 20,
         @Query("typeStatusOrder") typeStatusOrder: StatusOrderType = StatusOrderType.ALL
     ) : Response<ApiResponse<PagedResponse<OrderResponse>>>
+
+
+    @GET("favourites/get")
+    suspend fun getFavouriteProducts(): Response<ApiResponse<List<ProductResponse>>>
+
+    @POST("favourites/add")
+    suspend fun addToFavourite(@Query("productId") productId: Long): Response<ApiResponse<Any>>
+
+    @DELETE("favourites/delete")
+    suspend fun removeFromFavourite(@Query("productId") productId: Long): Response<ApiResponse<Any>>
+
+    @GET("product")
+    suspend fun getAllProducts(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): Response<ApiResponse<PagedResponse<ProductResponse>>>
+
+    @GET("product/details/{id}")
+    suspend fun getProductDetail(@Path("id") id: Long): Response<ApiResponse<ProductResponse>>
+
+    @GET("reviews/product/{productId}")
+    suspend fun getProductReviews(
+        @Path("productId") productId: Long,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): Response<ApiResponse<PagedResponse<ReviewResponse>>>
+
+    @GET("reviews/stats/{productId}")
+    suspend fun getProductReviewStats(
+        @Path("productId") productId: Long
+    ): Response<ApiResponse<ReviewStatsResponse>>
+
+
+    @GET("product/by-category/{categoryId}")
+    suspend fun getProductsByCategory(
+        @Path("categoryId") categoryId: Long,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): Response<ApiResponse<PagedResponse<ProductResponse>>>
 }

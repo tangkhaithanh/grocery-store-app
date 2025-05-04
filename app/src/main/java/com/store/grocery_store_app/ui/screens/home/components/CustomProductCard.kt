@@ -2,11 +2,14 @@ package com.store.grocery_store_app.ui.screens.home.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ShoppingBasket
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -74,6 +77,8 @@ fun CustomProductCard(
     showRating: Boolean = true,
     addToCartIcon: ImageVector = Icons.Default.Add,
     currencyLocale: Locale = Locale("vi", "VN"),
+    isFavourite: Boolean = false,                        // Thêm tham số này
+    onFavouriteClick: () -> Unit = {},
     onProductClick: () -> Unit,
     onAddToCartClick: () -> Unit = {}
 ) {
@@ -207,6 +212,25 @@ fun CustomProductCard(
                             fontWeight = FontWeight.Bold
                         )
                     }
+                }
+                // Thêm nút trái tim ở góc trên bên phải dành cho chuc nang them san pham yeu thich
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .padding(4.dp)
+                        .align(Alignment.TopEnd)
+                        .offset(x = (-8).dp, y = 8.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.9f))
+                        .clickable { onFavouriteClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isFavourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = if (isFavourite) "Xóa khỏi yêu thích" else "Thêm vào yêu thích",
+                        tint = if (isFavourite) Color(0xFFE91E63) else Color(0xFF212121),
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
 

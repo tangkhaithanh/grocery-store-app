@@ -35,7 +35,13 @@ sealed class Screen(val route: String) {
 
     object Order : Screen("order")
 
+<<<<<<< HEAD
     object Splash : Screen("splash")
 
     object Intro : Screen("intro")
+=======
+    object ProductDetails : Screen("product_details/{productId}") {
+        fun createRoute(productId: Long): String = "product_details/$productId"
+    }
+>>>>>>> remotes/origin/dev_thanh
 }

@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.store.grocery_store_app.ui.screens.FavoriteProduct.FavoriteProductViewModel
 import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.screens.home.components.BottomNavigation
 import com.store.grocery_store_app.ui.screens.home.components.HeaderSection
@@ -25,8 +26,11 @@ fun HomeScreen(
     onLogout: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
     categoryViewModel: CategoryViewModel = hiltViewModel(),
-    productViewModel: ProductViewModel = hiltViewModel(), // Thêm ProductViewModel
+    productViewModel: ProductViewModel = hiltViewModel(),
+    favouriteViewModel: FavoriteProductViewModel = hiltViewModel(),
+    newArrivalsViewModel: NewArrivalsViewModel = hiltViewModel(),// Thêm ProductViewModel
     onNavigateToOrder: () -> Unit,
+    onNavigateToProductDetails: (Long) -> Unit
 
     ) {
     val authState by authViewModel.authState.collectAsState()
@@ -37,6 +41,12 @@ fun HomeScreen(
     val isUserLoggedIn = authState.isLoggedIn
 
     var showProfileMenu by remember { mutableStateOf(false) }
+
+    LaunchedEffect(authState.isLoggedIn) {
+        if (authState.isLoggedIn) {
+            favouriteViewModel.loadFavouriteProducts()
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -73,25 +83,37 @@ fun HomeScreen(
                     }
                 )
 
-                // Recommendation section
                 BestSellerProducts(
                     viewModel = productViewModel,
+                    favouriteViewModel = favouriteViewModel,
                     onSeeMoreClick = {
-                        // Xử lý khi người dùng nhấn "See more"
-                        // Ví dụ: Chuyển đến trang danh sách sản phẩm bán chạy
+                        // Navigate to a full list of best sellers (could be implemented later)
                     },
                     onProductClick = { productId ->
-                        // Xử lý khi người dùng nhấn vào sản phẩm
-                        // Ví dụ: Chuyển đến trang chi tiết sản phẩm
+                        // Navigate to product details when a product is clicked
+                        onNavigateToProductDetails(productId)
                     },
                     onAddToCartClick = { product ->
-                        // Xử lý khi người dùng thêm sản phẩm vào giỏ hàng
-                        // Ví dụ: Gọi hàm thêm vào giỏ hàng trong ViewModel
+                        // Handle add to cart (could be implemented with CartViewModel)
                     }
                 )
 
-                // Featured section header (just the title)
-                FeaturedSectionHeader()
+                // New Arrivals section
+                NewArrivalProducts(
+                    viewModel = newArrivalsViewModel,
+                    favouriteViewModel = favouriteViewModel,
+                    onSeeMoreClick = {
+                        // Navigate to a full list of new arrivals (could be implemented later)
+                    },
+                    onProductClick = { productId ->
+                        // Navigate to product details when a product is clicked
+                        onNavigateToProductDetails(productId)
+                    },
+                    onAddToCartClick = { product ->
+                        // Handle add to cart (could be implemented with CartViewModel)
+                    }
+                )
+
 
                 // Bottom space for scrolling
                 Spacer(modifier = Modifier.height(50.dp))
@@ -112,31 +134,5 @@ fun HomeScreen(
                 )
             }
         }
-    }
-}
-
-
-@Composable
-fun FeaturedSectionHeader() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Featured",
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = DeepTeal
-            )
-        )
-
-        Text(
-            text = "See all",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFFE57373)
-        )
     }
 }
