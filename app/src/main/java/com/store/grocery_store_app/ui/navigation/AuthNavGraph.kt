@@ -1,7 +1,4 @@
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -16,25 +13,18 @@ import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
 import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
+import com.store.grocery_store_app.ui.screens.intro.IntroScreen
 import com.store.grocery_store_app.ui.screens.order.OrderScreen
+import com.store.grocery_store_app.ui.screens.splash.SplashScreen
 import com.store.grocery_store_app.utils.AuthPurpose
 
 @Composable
 fun AuthNavGraph(
     navController: NavHostController,
-    startDestination: String = Screen.Login.route,
+    startDestination: String = Screen.Splash.route,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val authState by authViewModel.authState.collectAsState()
 
-    // Check if user is logged in for auto-login
-    LaunchedEffect(authState.isLoggedIn) {
-        if (authState.isLoggedIn) {
-            navController.navigate(Screen.Home.route) {
-                popUpTo(Screen.Login.route) { inclusive = true }
-            }
-        }
-    }
 
     NavHost(
         navController = navController,
@@ -196,6 +186,32 @@ fun AuthNavGraph(
                 onHome = {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = true}
+                    }
+                }
+            )
+        }
+
+        composable(route = Screen.Splash.route) {
+            SplashScreen(
+                onIntro = {
+                    navController.navigate(Screen.Intro.route) {
+                        popUpTo(Screen.Intro.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(route = Screen.Intro.route) {
+            IntroScreen(
+                authViewModel,
+                onAutoLogin = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
             )
