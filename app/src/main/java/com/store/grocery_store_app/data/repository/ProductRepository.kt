@@ -18,4 +18,8 @@ interface ProductRepository {
         size: Int = 20
     ): Flow<Resource<List<ProductResponse>>>
 
+    // Search:
+    suspend fun searchProducts(query: String, page: Int = 0, size: Int = 20): Flow<Resource<List<ProductResponse>>>
+
+
 }

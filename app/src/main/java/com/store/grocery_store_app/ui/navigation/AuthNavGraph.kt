@@ -14,6 +14,7 @@ import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
+import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.intro.IntroScreen
 import com.store.grocery_store_app.ui.screens.order.OrderScreen
 import com.store.grocery_store_app.ui.screens.reviews.ReviewProductScreen
@@ -152,8 +153,10 @@ fun AuthNavGraph(
                 },
                 onNavigateToOrder = {
                     navController.navigate(Screen.Order.route)
-                }
-            )
+                },
+                onNavigateToSearch = {
+                    navController.navigate(Screen.Search.route)
+                }            )
         }
 
         // Order Screen
@@ -222,9 +225,20 @@ fun AuthNavGraph(
                 }
             )
         }
-
-        //Review Product Screen
-        composable(
+		
+		// Unified Search Screen
+        composable(route = Screen.Search.route) {
+            SearchScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onProductClick = { productId ->
+                    navController.navigate(Screen.ProductDetails.createRoute(productId))
+                }
+            )
+        }
+		// review Product Screen
+		composable(
             route = Screen.Review.route,
             arguments = listOf(
                 navArgument("orderId") { type = NavType.LongType },

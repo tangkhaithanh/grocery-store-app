@@ -113,4 +113,33 @@ class ProductRepositoryImpl @Inject constructor(private val apiService: ApiServi
             emit(Resource.Error("Lỗi không xác định: ${e.message}"))
         }
     }
+
+    override suspend fun searchProducts(
+        query: String,
+        page: Int,
+        size: Int
+    ): Flow<Resource<List<ProductResponse>>> = flow {
+        emit(Resource.Loading())
+        try {
+            val response = apiService.searchProducts(keyword = query, page = page, size = size)
+            if (response.isSuccessful) {
+                response.body()?.let { apiResponse ->
+                    if (apiResponse.success && apiResponse.data != null) {
+                        val products = apiResponse.data.content
+                        emit(Resource.Success(products))
+                    } else {
+                        emit(Resource.Error(apiResponse.message))
+                    }
+                } ?: emit(Resource.Error("Phản hồi rỗng từ server"))
+            } else {
+                emit(Resource.Error("Tìm kiếm sản phẩm thất bại: ${response.message()}"))
+            }
+        } catch (e: HttpException) {
+            emit(Resource.Error("Lỗi HTTP: ${e.message()}"))
+        } catch (e: IOException) {
+            emit(Resource.Error("Không thể kết nối đến máy chủ"))
+        } catch (e: Exception) {
+            emit(Resource.Error("Lỗi không xác định: ${e.message}"))
+        }
+    }
 }

@@ -30,8 +30,9 @@ fun HomeScreen(
     favouriteViewModel: FavoriteProductViewModel = hiltViewModel(),
     newArrivalsViewModel: NewArrivalsViewModel = hiltViewModel(),// Thêm ProductViewModel
     onNavigateToOrder: () -> Unit,
-    onNavigateToProductDetails: (Long) -> Unit
-
+    onNavigateToProductDetails: (Long) -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToCart: () -> Unit = {}
     ) {
     val authState by authViewModel.authState.collectAsState()
     val scrollState = rememberScrollState()
@@ -70,7 +71,12 @@ fun HomeScreen(
                 // Header with search and location
                 HeaderSection(
                     isUserLoggedIn = isUserLoggedIn,
-                    onProfileClick = { showProfileMenu = true }
+                    onProfileClick = { showProfileMenu = true },
+                    onCartClick = onNavigateToCart,             // Dùng callback từ HomeScreen
+                    onNavigateToSearch = onNavigateToSearch,    // Dùng cùng callback với onSearchClick
+                    cartItemCount = 5,                         // Có thể thay bằng số lượng thực tế từ giỏ hàng
+                    locationName = "TP Hồ Chí Minh, VN"        // Có thể thay bằng vị trí thực tế của người dùng
+
                 )
 
                 // Categories
