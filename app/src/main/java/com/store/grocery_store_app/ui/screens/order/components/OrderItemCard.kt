@@ -45,7 +45,7 @@ import com.store.grocery_store_app.data.models.OrderItem
 @Composable
 fun OrderItemCard(
     order: OrderItem,
-    onNavigateToReviewProduct: (Long) -> Unit,
+    onNavigateToReviewProduct: (Long,Long) -> Unit,
     ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -142,7 +142,10 @@ fun OrderItemCard(
                     // Nút: Đánh giá nổi bật
                     Button(
                         onClick = {
-                            onNavigateToReviewProduct(order.orderItemId.toLong())
+                            onNavigateToReviewProduct(
+                                order.orderId.toLong(),
+                                order.orderItemId.toLong()
+                            )
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF2196F3), // Màu xanh nổi bật

@@ -3,16 +3,21 @@ package com.store.grocery_store_app.di
 import android.content.Context
 import com.store.grocery_store_app.data.api.ApiService
 import com.store.grocery_store_app.data.api.AuthInterceptor
+import com.store.grocery_store_app.data.api.CloudinaryService
 import com.store.grocery_store_app.data.local.TokenManager
 import com.store.grocery_store_app.data.repository.AuthRepository
 import com.store.grocery_store_app.data.repository.CategoryRepository
+import com.store.grocery_store_app.data.repository.CloudinaryRepository
 import com.store.grocery_store_app.data.repository.FavoriteProductRepository
+import com.store.grocery_store_app.data.repository.OrderItemRepository
 import com.store.grocery_store_app.data.repository.OrderRepository
 import com.store.grocery_store_app.data.repository.ProductRepository
 import com.store.grocery_store_app.data.repository.ReviewRepository
 import com.store.grocery_store_app.data.repository.impl.AuthRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CategoryRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.CloudinaryRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.FavoriteProductRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.OrderItemRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.OrderRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.ProductRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.ReviewRepositoryImpl
@@ -27,11 +32,13 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.annotation.Signed
+import javax.inject.Named
 import javax.inject.Singleton
-
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
     @Provides
     @Singleton
     fun provideTokenManager(@ApplicationContext context: Context): TokenManager {
@@ -62,6 +69,7 @@ object AppModule {
 
     @Provides
     @Singleton
+    @Named("apiRetrofit")
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
@@ -72,8 +80,39 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideApiService(retrofit: Retrofit): ApiService {
+    fun provideApiService(@Named("apiRetrofit") retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
+    }
+    @Provides
+    @Singleton
+    @Named("cloudinaryOkHttpClient")
+    fun provideCloudinaryOkHttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor) // KHÔNG thêm AuthInterceptor
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+    @Provides
+    @Singleton
+    @Named("cloudinaryRetrofit")
+    fun provideCloudinaryRetrofit(@Named("cloudinaryOkHttpClient") okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(Constants.BASE_URL_CLOUDINARY)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCloudinaryService(@Named("cloudinaryRetrofit") retrofit: Retrofit): CloudinaryService {
+        return retrofit.create(CloudinaryService::class.java)
     }
 
     @Provides
@@ -82,7 +121,6 @@ object AppModule {
         return AuthRepositoryImpl(apiService, tokenManager)
     }
 
-    // Thêm provider cho CategoryRepository
     @Provides
     @Singleton
     fun provideCategoryRepository(apiService: ApiService): CategoryRepository {
@@ -103,9 +141,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFavouriteRepository(
-        apiService: ApiService
-    ): FavoriteProductRepository {
+    fun provideFavouriteRepository(apiService: ApiService): FavoriteProductRepository {
         return FavoriteProductRepositoryImpl(apiService)
     }
 
@@ -113,5 +149,17 @@ object AppModule {
     @Singleton
     fun provideReviewRepository(apiService: ApiService): ReviewRepository {
         return ReviewRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOrderItemRepository(apiService: ApiService): OrderItemRepository {
+        return OrderItemRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCloudinaryRepository(cloudinaryService: CloudinaryService, @ApplicationContext context: Context): CloudinaryRepository {
+        return CloudinaryRepositoryImpl(cloudinaryService, context)
     }
 }

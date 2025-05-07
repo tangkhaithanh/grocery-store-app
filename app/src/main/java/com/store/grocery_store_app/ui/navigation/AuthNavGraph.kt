@@ -164,8 +164,8 @@ fun AuthNavGraph(
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
                 },
-                onNavigateToReviewProduct = { orderItemId ->
-                    navController.navigate(Screen.Review.createRoute(orderItemId))
+                onNavigateToReviewProduct = { orderId, orderItemId ->
+                    navController.navigate(Screen.Review.createRoute(orderId, orderItemId))
                 }
             )
         }
@@ -226,11 +226,16 @@ fun AuthNavGraph(
         //Review Product Screen
         composable(
             route = Screen.Review.route,
-            arguments = listOf(navArgument("orderItemId") { type = NavType.LongType })
+            arguments = listOf(
+                navArgument("orderId") { type = NavType.LongType },
+                navArgument("orderItemId") { type = NavType.LongType }
+            )
         ) {
             backStackEntry ->
+            val orderId = backStackEntry.arguments?.getLong("orderId") ?: 0L
             val orderItemId = backStackEntry.arguments?.getLong("orderItemId") ?: 0L
             ReviewProductScreen(
+                orderId = orderId,
                 orderItemId = orderItemId,
                 onNavigateToOrder = {
                     navController.popBackStack()

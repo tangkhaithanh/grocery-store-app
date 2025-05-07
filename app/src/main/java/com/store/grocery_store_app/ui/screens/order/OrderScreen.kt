@@ -51,7 +51,7 @@ import com.store.grocery_store_app.utils.OrderUtil.groupOrders
 fun OrderScreen(
     orderViewModel: OrderViewModel = hiltViewModel(),
     onHome: () -> Unit,
-    onNavigateToReviewProduct: (Long) -> Unit,
+    onNavigateToReviewProduct: ( Long, Long) -> Unit,
 ) {
     val orderState by orderViewModel.state.collectAsState()
     val isLoading = orderState.isLoading

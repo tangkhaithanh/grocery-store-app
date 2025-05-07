@@ -1,9 +1,18 @@
 package com.store.grocery_store_app.ui.screens.reviews
 
+import android.net.Uri
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.store.grocery_store_app.data.api.CloudinaryService
+import com.store.grocery_store_app.data.models.response.OrderItemResponse
 import com.store.grocery_store_app.data.models.response.ReviewResponse
 import com.store.grocery_store_app.data.models.response.ReviewStatsResponse
+import com.store.grocery_store_app.data.repository.CloudinaryRepository
+import com.store.grocery_store_app.data.repository.OrderItemRepository
 import com.store.grocery_store_app.data.repository.ReviewRepository
 import com.store.grocery_store_app.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,7 +21,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import javax.inject.Inject
+import javax.inject.Named
 
 data class ReviewState(
     val isLoading: Boolean = false,
@@ -24,7 +39,9 @@ data class ReviewState(
 )
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val orderItemRepository: OrderItemRepository,
+    private val cloudinaryRepository: CloudinaryRepository,
 ) : ViewModel()
 {
     private val _state = MutableStateFlow(ReviewState())
@@ -75,7 +92,7 @@ class ReviewViewModel @Inject constructor(
                         _state.update {
                             it.copy(
                                 isLoading = false,
-                                error = result.message ?: "Không thể tải đánh giá"
+                                error = result.message ?: "Không thể lấy đơn hàng sản phẩm"
                             )
                         }
                     }
@@ -117,4 +134,53 @@ class ReviewViewModel @Inject constructor(
     fun clearError() {
         _state.update { it.copy(error = null) }
     }
+
+    private val _orderItem = MutableStateFlow<OrderItemResponse?>(null)
+    val orderItem: StateFlow<OrderItemResponse?> = _orderItem
+
+    fun loadOrderItemById(orderItemId: Long) {
+        viewModelScope.launch {
+            orderItemRepository.getOrderItem(orderItemId).collect { result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        _state.update { it.copy(isLoading = true, error = null) }
+                    }
+                    is Resource.Success -> {
+                        _orderItem.value = result.data
+                        _state.update { it.copy(isLoading = false, error = null) }
+                    }
+                    is Resource.Error -> {
+                        _state.update { it.copy(isLoading = false, error = result.message) }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    private val _uploadedImageUrl = MutableStateFlow<String?>(null)
+    val uploadedImageUrl: StateFlow<String?> = _uploadedImageUrl.asStateFlow()
+
+    fun uploadImageToCloudinary(uri: Uri) {
+        viewModelScope.launch {
+            cloudinaryRepository.uploadImage(uri).collect { result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        _state.update { it.copy(isLoading = true, error = null) }
+                    }
+                    is Resource.Success -> {
+                        _uploadedImageUrl.value = result.data
+                        _state.update { it.copy(isLoading = false, error = null) }
+                    }
+                    is Resource.Error -> {
+                        _state.update { it.copy(isLoading = false, error = result.message) }
+                    }
+                }
+            }
+        }
+    }
+
+
+
 }

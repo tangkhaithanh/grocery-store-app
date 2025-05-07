@@ -108,4 +108,8 @@ dependencies {
 
 // Coil for Compose (alternative to Glide)
     implementation ("io.coil-kt:coil-compose:2.4.0")
+    //Upload to Cloudinary
+    implementation("androidx.activity:activity-ktx:1.4.0")
+    implementation("com.cloudinary:cloudinary-android:2.0.0")
+
 }

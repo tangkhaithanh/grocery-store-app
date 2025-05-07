@@ -1,8 +1,13 @@
 package com.store.grocery_store_app.ui.screens.reviews
 
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +19,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -38,35 +47,48 @@ import com.store.grocery_store_app.ui.screens.order.components.OrderItemRow
 import com.store.grocery_store_app.ui.screens.reviews.components.RatingStars
 import androidx.compose.material3.Switch
 import androidx.compose.material3.TextFieldColors
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.store.grocery_store_app.data.models.response.OrderItemResponse
+import com.store.grocery_store_app.data.models.response.toOrderItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReviewProductScreen(
-    orderItem: OrderItem = OrderItem(
-        orderId = "1",
-        orderItemId = "1",
-        productDescription = "Description",
-        canReview = true,
-        productName = "Sản phẩm AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        buyPrice = null,
-        imageRes = "",
-        quantity = 0,
-        sellPrice = null,
-        storeName = "Grocery App",
-        totalAmount = 12
-    ),
+    orderId : Long,
     orderItemId: Long,
     onNavigateToOrder: () -> Unit,
+    reviewViewModel: ReviewViewModel = hiltViewModel()
 ) {
     var rating by remember { mutableStateOf(5) }
     var comment by remember { mutableStateOf("") }
     var showUserName by remember { mutableStateOf(false) }
+    val orderItem by reviewViewModel.orderItem.collectAsState()
+    val urlImage by reviewViewModel.uploadedImageUrl.collectAsState();
+    LaunchedEffect(Unit) {
+        reviewViewModel.loadOrderItemById(orderItemId)
+    }
+
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                // Gọi ViewModel để upload hình ảnh lên Cloudinary
+                reviewViewModel.uploadImageToCloudinary(uri)
+            }
+        }
+    )
 
     Scaffold(
         topBar = {
@@ -91,6 +113,7 @@ fun ReviewProductScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -101,7 +124,7 @@ fun ReviewProductScreen(
                 thickness = 1.dp,
             )
             // Sản phẩm
-            OrderItemRow(item = orderItem)
+            orderItem?.toOrderItem(orderId)?.let { OrderItemRow(item = it) }
 
             // Đường cắt ngang
             Divider(
@@ -129,9 +152,44 @@ fun ReviewProductScreen(
                 }
             }
 
-            // Ảnh đánh giá
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Hình ảnh đánh giá")
+            //Upload Image Review
+            Row(
+            ) {
+                for(i in 0..0) {
+                    if (!urlImage.isNullOrBlank()) {
+                        Box(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(100.dp) // Kích thước vùng chứa viền
+                        ) {
+                            AsyncImage(
+                                model = urlImage,
+                                contentDescription = "Ảnh đánh giá",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .clickable { launcher.launch("image/*") }
+                            )
+                            // Icon delete ở góc trên bên phải
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Xoá ảnh",
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .size(20.dp)
+                                    .background(
+                                        color = Color.Black.copy(alpha = 0.5f)
+                                    )
+                                    .clickable {
+
+                                    },
+                                tint = Color.White
+                            )
+
+                        }
+                    }
+                }
+
 
                 Box(
                     modifier = Modifier
@@ -156,18 +214,29 @@ fun ReviewProductScreen(
                         )
                     }
 
-                    Icon(
-                        imageVector = Icons.Default.PhotoCamera,
-                        contentDescription = "Ảnh đánh giá",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .alpha(0.6f)
-                            .size(48.dp)
-                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PhotoCamera,
+                            contentDescription = "Ảnh đánh giá",
+                            modifier = Modifier
+                                .alpha(0.2f)
+                                .size(40.dp)
+                                .clickable { launcher.launch("image/*") }
+                        )
+                        Text(text = if(!urlImage.isNullOrBlank()) "4/5" else "5/5", modifier = Modifier.alpha(0.2f))
+
+                    }
+
                 }
 
-                Text(text = "5/5", modifier = Modifier.alpha(0.6f))
             }
+
+
 
 
             // Nhận xét
@@ -209,7 +278,7 @@ fun ReviewProductScreen(
                     onCheckedChange = { showUserName = it }
                 )
             }
-
+            urlImage.toString().let { Text(it) }
         }
     }
 }
@@ -219,6 +288,7 @@ fun ReviewProductScreen(
 @Composable
 fun ReviewProductScreenPreview() {
     ReviewProductScreen(
+        orderId = 1,
         orderItemId = 1,
         onNavigateToOrder = {}
     )
