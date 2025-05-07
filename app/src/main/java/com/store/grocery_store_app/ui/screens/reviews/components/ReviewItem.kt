@@ -87,7 +87,7 @@ fun ReviewItem(
         }
 
         // Nội dung đánh giá
-        if (review.comment.isNotBlank()) {
+        if (!review.comment.isNullOrBlank()) {
             Text(
                 text = review.comment,
                 style = MaterialTheme.typography.bodyMedium,
@@ -97,7 +97,7 @@ fun ReviewItem(
         }
 
         // Hình ảnh đánh giá
-        if (review.imageUrls.isNotEmpty()) {
+        if (review.imageUrls?.isNotEmpty() == true) {
             ReviewImageGallery(
                 images = review.imageUrls,
                 onImageClick = onImageClick

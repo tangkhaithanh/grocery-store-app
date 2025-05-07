@@ -232,9 +232,5 @@ class ReviewViewModel @Inject constructor(
 
         return uploadedUrls
     }
-
-
-
-
 }
 
