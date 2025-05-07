@@ -98,4 +98,11 @@ interface ApiService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20
     ): Response<ApiResponse<PagedResponse<ProductResponse>>>
+
+    @GET("product/search")
+    suspend fun searchProducts(
+        @Query("keyword") keyword: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): Response<ApiResponse<PagedResponse<ProductResponse>>>
 }

@@ -34,7 +34,11 @@ import com.store.grocery_store_app.ui.theme.Gray500
 @Composable
 fun HeaderSection(
     isUserLoggedIn: Boolean,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onCartClick: () -> Unit = {},
+    onNavigateToSearch: () -> Unit,
+    cartItemCount: Int? = null,
+    locationName: String
 ) {
     Box(
         modifier = Modifier
@@ -50,80 +54,26 @@ fun HeaderSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Search field
-                Card(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = Gray500,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = "Search for \"Grocery\"",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Gray500,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-                }
+                SearchBar(
+                    placeholder = "Search for \"Grocery\"",
+                    onClick = onNavigateToSearch,
+                    modifier = Modifier.weight(1f)
+                )
 
                 // Profile button
-                Card(
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(40.dp)
-                        .clickable { onProfileClick() },
-                    shape = CircleShape,
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = if (isUserLoggedIn) Icons.Default.Person else Icons.Default.Login,
-                            contentDescription = if (isUserLoggedIn) "Profile" else "Login",
-                            tint = DeepTeal
-                        )
-                    }
-                }
+                CircularIconButton(
+                    icon = if (isUserLoggedIn) Icons.Default.Person else Icons.Default.Login,
+                    contentDescription = if (isUserLoggedIn) "Profile" else "Login",
+                    onClick = onProfileClick,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
 
-                // Cart button
-                Card(
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(40.dp),
-                    shape = CircleShape,
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Cart",
-                            tint = DeepTeal
-                        )
-                    }
-                }
+                /// Cart button trong HeaderSection
+                CartButton(
+                    itemCount = cartItemCount,
+                    onClick   = onCartClick,
+                    modifier  = Modifier.padding(start = 8.dp)
+                )
             }
 
             // Location info
@@ -143,7 +93,7 @@ fun HeaderSection(
                     modifier = Modifier.padding(top = 4.dp)
                 ) {
                     Text(
-                        text = "California, USA",
+                        text = locationName,
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White
                     )
