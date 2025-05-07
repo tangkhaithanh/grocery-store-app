@@ -9,6 +9,7 @@ import com.store.grocery_store_app.data.models.request.RegisterRequest
 import com.store.grocery_store_app.data.models.response.ApiResponse
 import com.store.grocery_store_app.data.models.response.AuthResponse
 import com.store.grocery_store_app.data.models.response.CategoryResponse
+import com.store.grocery_store_app.data.models.response.OrderItemResponse
 import com.store.grocery_store_app.data.models.response.OrderResponse
 import com.store.grocery_store_app.data.models.response.PagedResponse
 import com.store.grocery_store_app.data.models.response.ProductResponse
