@@ -1,5 +1,6 @@
 package com.store.grocery_store_app.data.repository
 
+import com.store.grocery_store_app.data.models.request.ReviewRequest
 import com.store.grocery_store_app.data.models.response.ReviewResponse
 import com.store.grocery_store_app.data.models.response.ReviewStatsResponse
 import com.store.grocery_store_app.utils.Resource
@@ -15,4 +16,9 @@ interface ReviewRepository {
     suspend fun getProductReviewStats(
         productId: Long
     ): Flow<Resource<ReviewStatsResponse>>
+
+    suspend fun createReview(
+        reviewRequest : ReviewRequest,
+        orderItemId : Long
+    ): Flow<Resource<Boolean>>
 }

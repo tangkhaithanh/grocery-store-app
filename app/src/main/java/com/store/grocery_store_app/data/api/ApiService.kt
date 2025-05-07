@@ -6,6 +6,7 @@ import com.store.grocery_store_app.data.models.request.ForgotPasswordRequest
 import com.store.grocery_store_app.data.models.request.OtpRequest
 import com.store.grocery_store_app.data.models.request.OtpVerifyRequest
 import com.store.grocery_store_app.data.models.request.RegisterRequest
+import com.store.grocery_store_app.data.models.request.ReviewRequest
 import com.store.grocery_store_app.data.models.response.ApiResponse
 import com.store.grocery_store_app.data.models.response.AuthResponse
 import com.store.grocery_store_app.data.models.response.CategoryResponse
@@ -111,4 +112,10 @@ interface ApiService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20
     ): Response<ApiResponse<PagedResponse<ProductResponse>>>
+
+    @POST("reviews/add")
+    suspend fun createReview(
+        @Body reviewRequest : ReviewRequest,
+        @Query("orderItemId") orderItemId : Long
+    ) : Response<ApiResponse<Any>>
 }

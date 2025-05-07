@@ -1,6 +1,7 @@
 package com.store.grocery_store_app.data.repository.impl
 
 import com.store.grocery_store_app.data.api.ApiService
+import com.store.grocery_store_app.data.models.request.ReviewRequest
 import com.store.grocery_store_app.data.models.response.ReviewResponse
 import com.store.grocery_store_app.data.models.response.ReviewStatsResponse
 import com.store.grocery_store_app.data.repository.ReviewRepository
@@ -56,6 +57,30 @@ class ReviewRepositoryImpl @Inject constructor(private val apiService: ApiServic
                 } ?: emit(Resource.Error("Phản hồi rỗng từ server"))
             } else {
                 emit(Resource.Error("Lấy thống kê đánh giá thất bại: ${response.message()}"))
+            }
+        } catch (e: HttpException) {
+            emit(Resource.Error("Lỗi HTTP: ${e.message()}"))
+        } catch (e: IOException) {
+            emit(Resource.Error("Không thể kết nối đến máy chủ"))
+        } catch (e: Exception) {
+            emit(Resource.Error("Lỗi không xác định: ${e.message}"))
+        }
+    }
+
+    override suspend fun createReview(reviewRequest: ReviewRequest, orderItemId : Long): Flow<Resource<Boolean>> = flow{
+        emit(Resource.Loading())
+        try {
+            val response = apiService.createReview(reviewRequest, orderItemId)
+            if (response.isSuccessful) {
+                response.body()?.let { apiResponse ->
+                    if (apiResponse.success) {
+                        emit(Resource.Success(true))
+                    } else {
+                        emit(Resource.Error(apiResponse.message))
+                    }
+                }
+            } else {
+                emit(Resource.Error("đánh giá thất bại: ${response.message()}"))
             }
         } catch (e: HttpException) {
             emit(Resource.Error("Lỗi HTTP: ${e.message()}"))
