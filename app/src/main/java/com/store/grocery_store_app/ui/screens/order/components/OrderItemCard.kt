@@ -123,12 +123,15 @@ fun OrderItemCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (order.canReview == false) {
-                    // Nút: Xem đánh giá
-                    OutlinedButton(
-                        onClick = { /* TODO: Review */ },
-                    ) {
-                        Text("Xem đánh giá")
+                    if(order.reviewed==true) {
+                        // Nút: Xem đánh giá
+                        OutlinedButton(
+                            onClick = { /* TODO: Review */ },
+                        ) {
+                            Text("Xem đánh giá")
+                        }
                     }
+
 
                     Spacer(modifier = Modifier.width(8.dp))
 
@@ -138,7 +141,7 @@ fun OrderItemCard(
                     ) {
                         Text("Mua lại")
                     }
-                } else {
+                } else if(order.reviewed== false){
                     // Nút: Đánh giá nổi bật
                     Button(
                         onClick = {

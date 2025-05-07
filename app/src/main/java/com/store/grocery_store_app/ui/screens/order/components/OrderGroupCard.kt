@@ -1,5 +1,6 @@
 package com.store.grocery_store_app.ui.screens.order.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedButton
@@ -22,12 +25,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.store.grocery_store_app.data.models.OrderGroup
 
 @Composable
-fun OrderGroupCard(group: OrderGroup, tab : String) {
+fun OrderGroupCard(group: OrderGroup, tab : String, onNavigateToProductDetails: (Long) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val status = when (tab) {
         "Chờ xác nhận" -> "Chờ thanh toán"
@@ -60,14 +64,18 @@ fun OrderGroupCard(group: OrderGroup, tab : String) {
             Spacer(modifier = Modifier.height(8.dp))
 
             // Luôn hiển thị item đầu tiên
-            OrderItemRow(group.items.first())
-
+            if(tab == "Chờ xác nhận"|| tab =="Đã huỷ"){
+                OrderItemRow(group.items.first(), onNavigateToProductDetails )
+            }
+            else {
+                OrderItemRow(group.items.first())
+            }
             // Nếu có nhiều hơn 1 sản phẩm và chưa expanded -> hiển thị nút
             if (group.items.size > 1) {
                 if (expanded) {
                     group.items.drop(1).forEach {
                         Spacer(modifier = Modifier.height(6.dp))
-                        OrderItemRow(it)
+                        OrderItemRow(it, onNavigateToProductDetails)
                     }
                 }
 
@@ -89,7 +97,23 @@ fun OrderGroupCard(group: OrderGroup, tab : String) {
 
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                OutlinedButton(onClick = { }) { Text("Liên hệ Shop") }
+                if(tab == "Chờ xác nhận") {
+                    OutlinedButton(
+                        onClick = { },
+                        border = BorderStroke(1.dp, Color.Red)
+                    ) { Text("Hủy đơn hàng", style = TextStyle(color = Color.Red))}
+                    Spacer(modifier = Modifier.width(8.dp))
+                    OutlinedButton(onClick = { }) { Text("Liên hệ Shop") }
+                }
+                else if(tab == "Chờ lấy hàng") {
+                    OutlinedButton(onClick = { }) { Text("Liên hệ Shop") }
+                }
+                else if(tab == "Chờ giao hàng") {
+                    OutlinedButton(onClick = { }) { Text("Xem đơn hàng") }
+                }
+                else if(tab == "Đã huỷ") {
+                    Button (onClick = { }) { Text("Mua lại") }
+                }
             }
         }
     }

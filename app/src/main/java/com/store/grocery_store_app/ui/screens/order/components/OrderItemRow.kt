@@ -1,6 +1,7 @@
 package com.store.grocery_store_app.ui.screens.order.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +32,7 @@ import com.store.grocery_store_app.data.models.OrderItem
 
 
 @Composable
-fun OrderItemRow(item: OrderItem) {
+fun OrderItemRow(item: OrderItem, onNavigateWhenClickImage: (Long) -> Unit = {}) {
     Row(modifier = Modifier.padding(vertical = 4.dp)) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -41,7 +42,10 @@ fun OrderItemRow(item: OrderItem) {
             contentDescription = null,
             modifier = Modifier
                 .size(60.dp)
-                .clip(RoundedCornerShape(6.dp)),
+                .clip(RoundedCornerShape(6.dp))
+                .clickable {
+                    onNavigateWhenClickImage(item.productId)
+                },
             contentScale = ContentScale.Crop,
             error = painterResource(R.drawable.ic_package)
         )
@@ -79,6 +83,7 @@ fun OrderItemPreview() {
     OrderItemRow(item = OrderItem(
         orderId = "1",
         orderItemId = "1",
+        productId = 1,
         productDescription = "Description",
         canReview = true,
         productName = "Sản phẩm AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
@@ -87,7 +92,8 @@ fun OrderItemPreview() {
         quantity = 0,
         sellPrice = null,
         storeName = "Grocery App",
-        totalAmount = 12
+        totalAmount = 12,
+        reviewed = true
     )
     )
 }
