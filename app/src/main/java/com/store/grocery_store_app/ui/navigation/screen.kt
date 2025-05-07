@@ -43,6 +43,11 @@ sealed class Screen(val route: String) {
     object ProductDetails : Screen("product_details/{productId}") {
         fun createRoute(productId: Long): String = "product_details/$productId"
     }
-
-    object Search: Screen("search")
+	
+	object Review : Screen("review/{orderItemId}") {
+        fun createRoute(orderItemId: Long): String = "review/$orderItemId"
+    }
+	
+	object Search: Screen("search")
+	
 }

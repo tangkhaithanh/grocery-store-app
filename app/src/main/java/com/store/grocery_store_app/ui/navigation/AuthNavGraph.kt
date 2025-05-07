@@ -17,6 +17,7 @@ import com.store.grocery_store_app.ui.screens.home.HomeScreen
 import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.intro.IntroScreen
 import com.store.grocery_store_app.ui.screens.order.OrderScreen
+import com.store.grocery_store_app.ui.screens.reviews.ReviewProductScreen
 import com.store.grocery_store_app.ui.screens.splash.SplashScreen
 import com.store.grocery_store_app.utils.AuthPurpose
 
@@ -155,8 +156,7 @@ fun AuthNavGraph(
                 },
                 onNavigateToSearch = {
                     navController.navigate(Screen.Search.route)
-                }
-            )
+                }            )
         }
 
         // Order Screen
@@ -166,6 +166,9 @@ fun AuthNavGraph(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
+                },
+                onNavigateToReviewProduct = { orderItemId ->
+                    navController.navigate(Screen.Review.createRoute(orderItemId))
                 }
             )
         }
@@ -221,7 +224,9 @@ fun AuthNavGraph(
                     }
                 }
             )
-        }// Unified Search Screen
+        }
+		
+		// Unified Search Screen
         composable(route = Screen.Search.route) {
             SearchScreen(
                 onNavigateBack = {
@@ -232,7 +237,20 @@ fun AuthNavGraph(
                 }
             )
         }
+		// review Product Screen
+		composable(
+            route = Screen.Review.route,
+            arguments = listOf(navArgument("orderItemId") { type = NavType.LongType })
+        ) {
+            backStackEntry ->
+            val orderItemId = backStackEntry.arguments?.getLong("orderItemId") ?: 0L
+            ReviewProductScreen(
+                orderItemId = orderItemId,
+                onNavigateToOrder = {
+                    navController.popBackStack()
+                }
+            )
 
-
+        }
     }
 }

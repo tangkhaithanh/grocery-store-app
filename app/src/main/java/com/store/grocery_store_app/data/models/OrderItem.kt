@@ -4,13 +4,14 @@ import com.store.grocery_store_app.data.models.StatusOrderType
 
 data class OrderItem(
     val orderId: String,
+    val orderItemId: String,
     val storeName: String,
     val productName: String,
     val productDescription: String,
-    val imageRes: Int,
+    val imageRes: String,
     val quantity: Int,
     val sellPrice: BigDecimal?,
-    val buyPrice: BigDecimal,
+    val buyPrice: BigDecimal?,
     val totalAmount: Int,
     val canReview : Boolean
 )

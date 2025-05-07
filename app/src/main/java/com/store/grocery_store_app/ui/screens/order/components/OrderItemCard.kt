@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -35,12 +36,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.store.grocery_store_app.R
 import com.store.grocery_store_app.data.models.OrderItem
 
 
 @Composable
-fun OrderItemCard(order: OrderItem) {
+fun OrderItemCard(
+    order: OrderItem,
+    onNavigateToReviewProduct: (Long) -> Unit,
+    ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // ✅ Sửa ở đây
@@ -72,13 +78,17 @@ fun OrderItemCard(order: OrderItem) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Row {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_package),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(order.imageRes)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+                        .size(60.dp)
+                        .clip(RoundedCornerShape(6.dp)),
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(R.drawable.ic_package)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -131,7 +141,9 @@ fun OrderItemCard(order: OrderItem) {
                 } else {
                     // Nút: Đánh giá nổi bật
                     Button(
-                        onClick = { /* TODO: Review */ },
+                        onClick = {
+                            onNavigateToReviewProduct(order.orderItemId.toLong())
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF2196F3), // Màu xanh nổi bật
                             contentColor = Color.White

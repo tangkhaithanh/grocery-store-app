@@ -1,7 +1,6 @@
 package com.store.grocery_store_app.ui.screens.order
 
 import CategoryErrorView
-import CategoryLoadingIndicator
 import EmptyCategoryView
 import android.util.Log
 import androidx.compose.foundation.background
@@ -40,6 +39,7 @@ import com.store.grocery_store_app.R
 import com.store.grocery_store_app.data.models.OrderItem
 import com.store.grocery_store_app.data.models.OrderTab
 import com.store.grocery_store_app.data.models.StatusOrderType
+import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.order.components.OrderGroupCard
 import com.store.grocery_store_app.ui.screens.order.components.OrderItemCard
 import com.store.grocery_store_app.ui.theme.DeepTeal
@@ -50,10 +50,10 @@ import com.store.grocery_store_app.utils.OrderUtil.groupOrders
 @Composable
 fun OrderScreen(
     orderViewModel: OrderViewModel = hiltViewModel(),
-    onHome: () -> Unit
+    onHome: () -> Unit,
+    onNavigateToReviewProduct: (Long) -> Unit,
 ) {
     val orderState by orderViewModel.state.collectAsState()
-    val orders = orderState.orders
     val isLoading = orderState.isLoading
     val error = orderState.error
     val selectedTabIndex = remember { mutableStateOf(0) }
@@ -64,30 +64,8 @@ fun OrderScreen(
         OrderTab("Đã giao", StatusOrderType.DELIVERED),
         OrderTab("Đã huỷ", StatusOrderType.CANCELED)
     )
-    var sampleOrders by remember { mutableStateOf<List<OrderItem>>(emptyList()) }
-    LaunchedEffect(orders) {
-        Log.d("TestOrders", "Số lượng đơn hàng: ${orders.size}")
-        val resultList = mutableListOf<OrderItem>()
-        orders.forEach { order ->
-            order.orderItems.forEach { orderItem ->
-                resultList.add(
-                    OrderItem(
-                        orderId = order.id.toString(),
-                        storeName = "Grocery Store",
-                        productName = orderItem.product.name,
-                        productDescription = orderItem.product.description,
-                        imageRes = R.drawable.ic_package, // Replace with actual image if available
-                        quantity = orderItem.quantity,
-                        sellPrice = orderItem.product.price,
-                        buyPrice = orderItem.price,
-                        totalAmount = (orderItem.price * orderItem.quantity.toBigDecimal()).toInt(),
-                        orderItem.canReview
-                    )
-                )
-            }
-        }
-        sampleOrders = resultList
-    }
+    val orderItems = orderState.orderItems
+
 
     Column(
         modifier = Modifier
@@ -144,16 +122,19 @@ fun OrderScreen(
                         }
                     }
                 }
-                sampleOrders.isNotEmpty() -> {
+                orderItems.isNotEmpty() -> {
                     // Categories row with adjusted spacing
                     if (isDelivered) {
 
-                        items(sampleOrders) { order ->
-                            OrderItemCard(order)
+                        items(orderItems) { order ->
+                            OrderItemCard(
+                                order,
+                                onNavigateToReviewProduct
+                            )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     } else {
-                        val grouped = groupOrders(sampleOrders)
+                        val grouped = groupOrders(orderItems)
                         items(grouped) { group ->
                             OrderGroupCard(group, tabs[selectedTabIndex.value].title)
                             Spacer(modifier = Modifier.height(8.dp))
@@ -178,5 +159,5 @@ fun OrderScreen(
 @Preview(showBackground = true)
 @Composable
 fun OrderScreenPreview() {
-    OrderScreen(onHome = {})
+
 }
