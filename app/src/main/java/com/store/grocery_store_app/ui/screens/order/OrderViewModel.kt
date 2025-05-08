@@ -5,11 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.store.grocery_store_app.data.models.OrderItem
 import com.store.grocery_store_app.data.models.StatusOrderType
-import com.store.grocery_store_app.data.models.response.CategoryResponse
 import com.store.grocery_store_app.data.models.response.OrderResponse
-import com.store.grocery_store_app.data.repository.CategoryRepository
 import com.store.grocery_store_app.data.repository.OrderRepository
-import com.store.grocery_store_app.ui.screens.home.CategoryState
 import com.store.grocery_store_app.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +21,7 @@ data class OrderState(
     val orderItems: List<OrderItem> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val selectedOrderId: Long? = null
+    val selectedTabIndex: Int = 0
 )
 
 @HiltViewModel
@@ -36,6 +33,9 @@ class OrderViewModel @Inject constructor(
     val state: StateFlow<OrderState> = _state.asStateFlow()
     init{
         loadOrders(StatusOrderType.PENDING)
+    }
+    fun setSelectedTabIndex(index: Int) {
+        _state.update { it.copy(selectedTabIndex = index) }
     }
 
     fun loadOrders(status: StatusOrderType = StatusOrderType.ALL) {
@@ -79,6 +79,7 @@ class OrderViewModel @Inject constructor(
                     OrderItem(
                         orderId = order.id.toString(),
                         orderItemId = orderItem.id.toString(),
+                        productId = orderItem.product.id,
                         storeName = "Grocery Store",
                         productName = orderItem.product.name,
                         productDescription = orderItem.product.description,
@@ -87,7 +88,8 @@ class OrderViewModel @Inject constructor(
                         sellPrice = orderItem.product.price,
                         buyPrice = orderItem.price,
                         totalAmount = (orderItem.price * orderItem.quantity.toBigDecimal()).toInt(),
-                        canReview = orderItem.canReview
+                        canReview = orderItem.canReview,
+                        reviewed = orderItem.reviewed
                     )
                 )
             }

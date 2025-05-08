@@ -2,7 +2,6 @@ package com.store.grocery_store_app.ui.screens.order
 
 import CategoryErrorView
 import EmptyCategoryView
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,23 +22,18 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.store.grocery_store_app.R
-import com.store.grocery_store_app.data.models.OrderItem
 import com.store.grocery_store_app.data.models.OrderTab
 import com.store.grocery_store_app.data.models.StatusOrderType
-import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.order.components.OrderGroupCard
 import com.store.grocery_store_app.ui.screens.order.components.OrderItemCard
 import com.store.grocery_store_app.ui.theme.DeepTeal
@@ -51,12 +45,13 @@ import com.store.grocery_store_app.utils.OrderUtil.groupOrders
 fun OrderScreen(
     orderViewModel: OrderViewModel = hiltViewModel(),
     onHome: () -> Unit,
-    onNavigateToReviewProduct: ( Long, Long) -> Unit,
+    onNavigateToReviewProduct: (Long, Long) -> Unit,
+    onNavigateToProductDetails: (Long) -> Unit,
 ) {
     val orderState by orderViewModel.state.collectAsState()
     val isLoading = orderState.isLoading
     val error = orderState.error
-    val selectedTabIndex = remember { mutableStateOf(0) }
+    val selectedTabIndex = orderState.selectedTabIndex
     val tabs = listOf(
         OrderTab("Chờ xác nhận", StatusOrderType.PENDING),
         OrderTab("Chờ lấy hàng", StatusOrderType.CONFIRMED),
@@ -87,28 +82,28 @@ fun OrderScreen(
             }
         )
         ScrollableTabRow(
-            selectedTabIndex = selectedTabIndex.value,
+            selectedTabIndex = selectedTabIndex,
             edgePadding = 0.dp
             ) {
             tabs.forEachIndexed { index, tab ->
                 Tab(
-                    selected = selectedTabIndex.value == index,
+                    selected = selectedTabIndex == index,
                     onClick = {
-                        selectedTabIndex.value = index
+                        orderViewModel.setSelectedTabIndex(index)
                         orderViewModel.loadOrders(tab.status)
                     }
                 ) {
                     Text(
                         text = tab.title,
                         modifier = Modifier.padding(16.dp),
-                        fontWeight = if (selectedTabIndex.value == index) FontWeight.Bold else FontWeight.Normal,
-                        color = if (selectedTabIndex.value == index) Color.Red else Color.Black
+                        fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
+                        color = if (selectedTabIndex == index) Color.Red else Color.Black
                     )
                 }
             }
         }
 
-        val isDelivered = tabs[selectedTabIndex.value].title == "Đã giao"
+        val isDelivered = tabs[selectedTabIndex].title == "Đã giao"
 
         LazyColumn(modifier = Modifier.padding(8.dp)) {
             when {
@@ -136,7 +131,7 @@ fun OrderScreen(
                     } else {
                         val grouped = groupOrders(orderItems)
                         items(grouped) { group ->
-                            OrderGroupCard(group, tabs[selectedTabIndex.value].title)
+                            OrderGroupCard(group, tabs[selectedTabIndex].title, onNavigateToProductDetails)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }

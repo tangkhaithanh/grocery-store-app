@@ -169,6 +169,9 @@ fun AuthNavGraph(
                 },
                 onNavigateToReviewProduct = { orderId, orderItemId ->
                     navController.navigate(Screen.Review.createRoute(orderId, orderItemId))
+                },
+                onNavigateToProductDetails = { productId ->
+                    navController.navigate(Screen.ProductDetails.createRoute(productId))
                 }
             )
         }
