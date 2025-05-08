@@ -93,7 +93,7 @@ fun OrderItemCard(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(order.productName, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(order.productDescription, color = Color.Gray, fontSize = 12.sp)
+                    Text(order.productDescription,maxLines = 2, color = Color.Gray, fontSize = 12.sp)
                     Text("x${order.quantity}", color = Color.Gray, fontSize = 12.sp)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
