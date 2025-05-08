@@ -7,7 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -20,11 +23,19 @@ import androidx.compose.ui.unit.sp
 fun CartButton(
     itemCount: Int? = null,
     onClick: () -> Unit,
+    onPositioned: (Offset) -> Unit = {},
     modifier: Modifier = Modifier,
     iconTint: Color = Color.White          //  <-- mới
 ) {
     Box(
-        modifier = modifier.size(48.dp),
+        modifier = modifier
+            .size(48.dp)
+            .onGloballyPositioned { coordinates ->
+                // Lấy vị trí chính xác của tâm nút giỏ hàng
+                val centerX = coordinates.positionInRoot().x + coordinates.size.width / 2
+                val centerY = coordinates.positionInRoot().y + coordinates.size.height / 2
+                onPositioned(Offset(centerX, centerY))
+            },
         contentAlignment = Alignment.TopEnd
     ) {
         IconButton(

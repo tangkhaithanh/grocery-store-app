@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.store.grocery_store_app.data.models.response.ProductResponse
@@ -29,9 +30,9 @@ fun NewArrivalProducts(
         products = state.newArrivals,
         isLoading = state.isLoading,
         error = state.error,
-        favouriteViewModel = favouriteViewModel, // Truyền xuống ProductSection
+        favouriteViewModel = favouriteViewModel,
         onSeeMoreClick = onSeeMoreClick,
         onProductClick = onProductClick,
-        onAddToCartClick = onAddToCartClick
+        onAddToCartClick = onAddToCartClick,
     )
 }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,7 +25,7 @@ fun ProductCard(
     product: ProductResponse,
     favouriteViewModel: FavoriteProductViewModel = hiltViewModel(),
     onProductClick: () -> Unit,
-    onAddToCartClick: () -> Unit = {}
+    onAddToCartClick: () -> Unit = {},
 ) {
     // Determine the category color based on the product category
     val categoryColor = getCategoryColor(product.categoryName)
@@ -67,32 +68,31 @@ fun ProductCard(
             ).show()
         }
     }
-
-    // Use our reusable product card component
-    CustomProductCard(
-        image = product.imageUrls.firstOrNull(),
-        name = product.name,
-        category = product.categoryName,
-        categoryColor = categoryColor,
-        price = product.price.toDouble(),
-        effectivePrice = product.effectivePrice.toDouble(),
-        rating = product.averageRating,
-        soldCount = product.soldCount,
-        quantity = product.quantity,
-        badgeText = bestSellerBadge,
-        badgeBackgroundColor = Color(0xFFFF5252),
-        discountPercentage = discountPercentage,
-        addToCartButtonColor = DeepTeal,
-        priceColor = DeepTeal,
-        isFavourite = isFavourite,
-        onFavouriteClick = {
-            favouriteViewModel.toggleFavourite(product.id)
-        },
-        currencyLocale = Locale("vi", "VN"),
-        onProductClick = onProductClick,
-        onAddToCartClick = onAddToCartClick
-    )
-}
+        // Sử dụng phiên bản thông thường không có animation
+        CustomProductCard(
+            image = product.imageUrls.firstOrNull(),
+            name = product.name,
+            category = product.categoryName,
+            categoryColor = categoryColor,
+            price = product.price.toDouble(),
+            effectivePrice = product.effectivePrice.toDouble(),
+            rating = product.averageRating,
+            soldCount = product.soldCount,
+            quantity = product.quantity,
+            badgeText = bestSellerBadge,
+            badgeBackgroundColor = Color(0xFFFF5252),
+            discountPercentage = discountPercentage,
+            addToCartButtonColor = DeepTeal,
+            priceColor = DeepTeal,
+            isFavourite = isFavourite,
+            onFavouriteClick = {
+                favouriteViewModel.toggleFavourite(product.id)
+            },
+            currencyLocale = Locale("vi", "VN"),
+            onProductClick = onProductClick,
+            onAddToCartClick = onAddToCartClick
+        )
+    }
 
 /**
  * Helper function to get the appropriate color based on product category.

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.store.grocery_store_app.data.models.response.ProductResponse
@@ -32,6 +33,6 @@ fun BestSellerProducts(
         favouriteViewModel = favouriteViewModel, // Truyền xuống ProductSection
         onSeeMoreClick = onSeeMoreClick,
         onProductClick = onProductClick,
-        onAddToCartClick = onAddToCartClick
+        onAddToCartClick = onAddToCartClick,
     )
 }

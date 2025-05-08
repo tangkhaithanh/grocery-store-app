@@ -14,16 +14,17 @@ import com.store.grocery_store_app.ui.components.CustomButtonWithIcon
 fun AddToCartButton(
     remaining: Int,
     onAddToCart: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     val buttonText = if (remaining > 0) "Thêm vào giỏ hàng" else "Hết hàng"
 
     CustomButtonWithIcon(
-        text = buttonText,
-        onClick = onAddToCart,
+        text      = buttonText,
+        onClick   = onAddToCart,
         isLoading = isLoading,
-        enabled = remaining > 0,
-        icon = if (remaining > 0) Icons.Default.ShoppingCart else null,
-        modifier = Modifier.fillMaxWidth()
+        enabled   = remaining > 0,
+        icon      = if (remaining > 0) Icons.Default.ShoppingCart else null,
+        modifier  = modifier.fillMaxWidth()  // ⬅️ Dùng modifier truyền vào
     )
 }

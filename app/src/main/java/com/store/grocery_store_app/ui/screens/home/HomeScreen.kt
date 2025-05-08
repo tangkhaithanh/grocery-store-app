@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,8 @@ fun HomeScreen(
     val authState by authViewModel.authState.collectAsState()
     val scrollState = rememberScrollState()
     val categoryState by categoryViewModel.state.collectAsState()
+    // Track cart button position
+    var cartPosition by remember { mutableStateOf<Offset?>(null) }
 
     // Check if the user is logged in
     val isUserLoggedIn = authState.isLoggedIn
@@ -75,8 +78,7 @@ fun HomeScreen(
                     onCartClick = onNavigateToCart,             // Dùng callback từ HomeScreen
                     onNavigateToSearch = onNavigateToSearch,    // Dùng cùng callback với onSearchClick
                     cartItemCount = 5,                         // Có thể thay bằng số lượng thực tế từ giỏ hàng
-                    locationName = "TP Hồ Chí Minh, VN"        // Có thể thay bằng vị trí thực tế của người dùng
-
+                    locationName = "TP Hồ Chí Minh, VN",        // Có thể thay bằng vị trí thực tế của người dùng
                 )
 
                 // Categories
@@ -124,6 +126,7 @@ fun HomeScreen(
                 // Bottom space for scrolling
                 Spacer(modifier = Modifier.height(50.dp))
             }
+
 
             // Profile menu dropdown
             if (showProfileMenu) {

@@ -16,11 +16,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.store.grocery_store_app.ui.Animation.AddToCartAnimation
 import com.store.grocery_store_app.ui.components.LoadingDialog
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.AddToCartButton
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.BestSellerBadge
@@ -49,12 +53,18 @@ fun ProductDetailsScreen(
     reviewViewModel: ReviewViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onAddToCartSuccess: () -> Unit,
-    onNavigateToProduct: (Long) -> Unit // Thêm callback này để điều hướng đến sản phẩm khác
+    onNavigateToProduct: (Long) -> Unit, // Thêm callback này để điều hướng đến sản phẩm khác
+    onNavigateToCart: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
     val reviewState by reviewViewModel.state.collectAsState()
     val similarProductsState by viewModel.similarProductsState.collectAsState()
     val scrollState = rememberScrollState()
+
+    // Biến trạng thái cho animation
+    var isAnimating by remember { mutableStateOf(false) }
+    var cartButtonPosition by remember { mutableStateOf(Offset.Zero) }
+    var addToCartButtonPosition by remember { mutableStateOf(Offset.Zero) }
 
     // Currency formatter for Vietnamese Dong
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
@@ -66,6 +76,14 @@ fun ProductDetailsScreen(
         viewModel.loadProductDetails(productId)
         reviewViewModel.loadProductReviews(productId, true)
         reviewViewModel.loadReviewStats(productId)  // Gọi API để lấy thống kê đánh giá
+    }
+    // Function to handle animation completion
+    fun onAnimationComplete() {
+        // Reset animation state
+        isAnimating = false
+
+        // Call the actual add to cart functionality
+        //onAddToCartSuccess()
     }
 
     // Add a new LaunchedEffect that triggers when the product loads
@@ -79,8 +97,51 @@ fun ProductDetailsScreen(
             ProductDetailsTopBar(
                 isFavorite = state.isFavorite,
                 onNavigateBack = onNavigateBack,
-                onToggleFavorite = { viewModel.toggleFavorite() }
+                onToggleFavorite = { viewModel.toggleFavorite() },
+                onCartClick = onNavigateToCart, // Thêm xử lý sự kiện nhấp vào giỏ hàng
+                cartItemCount = 5, // Có thể thay bằng số lượng thực tế từ CartViewModel
+                onCartPositioned = { position ->
+                    cartButtonPosition = position
+                }
             )
+        },
+        bottomBar = {
+            state.product?.let { product ->
+                val remaining = product.quantity - product.soldCount
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shadowElevation = 8.dp
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AddToCartButton(
+                            remaining = remaining,
+                            onAddToCart = {
+                                if (!isAnimating &&
+                                    cartButtonPosition != Offset.Zero &&
+                                    addToCartButtonPosition != Offset.Zero
+                                ) {
+                                    isAnimating = true
+                                }
+                            },
+                            // ⬇⬇ Lấy đúng tọa độ tâm nút
+                            modifier = Modifier
+                                .onGloballyPositioned { c ->
+                                    val cx = c.positionInRoot().x + c.size.width / 2
+                                    val cy = c.positionInRoot().y + c.size.height / 2
+                                    addToCartButtonPosition = Offset(cx, cy)
+                                }
+                                .fillMaxWidth()      // hoặc kích thước bạn muốn
+                        )
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -230,20 +291,6 @@ fun ProductDetailsScreen(
                     // Description card
                     ProductDescriptionCard(description = product.description)
 
-                    // Add to cart button with fixed height padding for bottom space
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        AddToCartButton(
-                            remaining = product.quantity - product.soldCount,
-                            onAddToCart = {
-                            },
-                            isLoading =false
-                        )
-                    }
-
                     Spacer(modifier = Modifier.height(24.dp))
                     // Reviews section - Added component
                     ReviewSection(
@@ -273,9 +320,20 @@ fun ProductDetailsScreen(
                             // Nếu cần thêm callback để điều hướng đến category
                         }
                     )
-
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
+            }
+            // Hiệu ứng thêm vào giỏ hàng
+            if (cartButtonPosition != Offset.Zero && addToCartButtonPosition != Offset.Zero) {
+                // Lấy URL hình ảnh đầu tiên từ sản phẩm nếu có
+                val imageUrl = state.product?.imageUrls?.firstOrNull()
+
+                AddToCartAnimation(
+                    imageUrl = imageUrl,
+                    isPlaying = isAnimating,
+                    sourcePosition = addToCartButtonPosition,
+                    cartPosition = cartButtonPosition,
+                    onAnimationEnd = ::onAnimationComplete
+                )
             }
         }
     }
