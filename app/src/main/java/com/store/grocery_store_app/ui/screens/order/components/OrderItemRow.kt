@@ -29,10 +29,15 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.store.grocery_store_app.R
 import com.store.grocery_store_app.data.models.OrderItem
+import java.text.NumberFormat
+import java.util.Locale
 
 
 @Composable
 fun OrderItemRow(item: OrderItem, onNavigateWhenClickImage: (Long) -> Unit = {}) {
+    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
+        maximumFractionDigits = 0
+    }
     Row(modifier = Modifier.padding(vertical = 4.dp)) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -61,16 +66,16 @@ fun OrderItemRow(item: OrderItem, onNavigateWhenClickImage: (Long) -> Unit = {})
         }
         Spacer(modifier = Modifier.width(4.dp))
         Column(horizontalAlignment = Alignment.End) {
-            if (item.sellPrice != null) {
+            if (item.sellPrice != null && item.buyPrice != item.sellPrice) {
                 Text(
-                    text = "₫${item.sellPrice}",
+                    text = currencyFormatter.format(item.sellPrice),
                     style = TextStyle(textDecoration = TextDecoration.LineThrough),
                     color = Color.Gray,
                     fontSize = 12.sp
                 )
             }
             if(item.buyPrice != null ) {
-                Text("₫${item.buyPrice}", fontWeight = FontWeight.Bold)
+                Text(currencyFormatter.format(item.buyPrice), fontWeight = FontWeight.Bold)
             }
         }
     }
