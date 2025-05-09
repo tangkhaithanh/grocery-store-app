@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,8 +56,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.store.grocery_store_app.data.models.response.ProductResponse
+import com.store.grocery_store_app.ui.components.ErrorDialog
+import com.store.grocery_store_app.ui.components.LoadingDialog
+import com.store.grocery_store_app.ui.components.SuccessDialog
+import com.store.grocery_store_app.ui.screens.cart.CartViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -67,14 +74,15 @@ fun AddToCartSheet(
     product : ProductResponse,
     onDismiss: () -> Unit,
     onAddToCart: () -> Unit = {},
-    onNavigateToCart: () -> Unit = {}
+    onNavigateToCart: () -> Unit = {},
+    cartViewModel: CartViewModel = hiltViewModel()
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
     }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()  // Tạo scope cho coroutine
-
+    val cartState by cartViewModel.state.collectAsState()
     var quantityCart by remember { mutableStateOf(1) }
 
     ModalBottomSheet(
@@ -87,6 +95,26 @@ fun AddToCartSheet(
             bottomEnd = 0.dp    // Không bo góc dưới bên phải
         ),
     ) {
+        LoadingDialog(
+            isLoading = cartState.isLoading,
+            message = "Đang thêm sản phẩm vào giỏ hàng"
+        )
+        if(cartState.isSuccess) {
+            SuccessDialog(
+                title = "Thêm thành công",
+                content = "Sản phẩm đã được thêm vào giỏ hàng",
+                clearError = cartViewModel::clearError,
+            )
+        }
+        if(cartState.error!=null) {
+            ErrorDialog(
+                title = "Thêm thất bại",
+                content = "Thêm sản phẩm vô giỏ hàng thất bại",
+                clearError = cartViewModel::clearError
+            )
+        }
+
+
         Box(
             modifier = Modifier
                 .padding(
@@ -246,12 +274,30 @@ fun AddToCartSheet(
             )
             AddToCartButton(
                 remaining = product.quantity - product.soldCount,
+                onAddToCart = {
+                    var img : String? = null
+                    if(product.imageUrls.size == 0) {
+                        img = product.imageUrls.get(0)
+                    }
+                    cartViewModel.insertProductIntoCart(
+                        idCart = null,
+                        flashSaleId = null,
+                        quantity = quantityCart,
+                        priceCart = product.effectivePrice,
+                        idProduct = product.id,
+                        name = product.name,
+                        priceProduct = product.price,
+                        imageUrl = img
+                    )
+
+                },
                 // ⬇⬇ Lấy đúng tọa độ tâm nút
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
 
                 // hoặc kích thước bạn muốn
+
             )
         }
     }

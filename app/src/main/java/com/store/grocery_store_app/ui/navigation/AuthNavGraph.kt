@@ -1,4 +1,5 @@
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.internal.composableLambda
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,6 +14,7 @@ import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
 import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
+import com.store.grocery_store_app.ui.screens.cart.CartScreen
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
 import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.intro.IntroScreen
@@ -156,7 +158,13 @@ fun AuthNavGraph(
                 },
                 onNavigateToSearch = {
                     navController.navigate(Screen.Search.route)
-                }            )
+                },
+                onNavigateToCart = {
+                    navController.navigate(Screen.Cart.route) {
+                        popUpTo(Screen.Cart.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         // Order Screen
@@ -256,6 +264,17 @@ fun AuthNavGraph(
                 orderItemId = orderItemId,
                 onNavigateToOrder = {
                     navController.popBackStack()
+                }
+            )
+
+        }
+
+        composable(route = Screen.Cart.route) {
+            CartScreen(
+                onHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
                 }
             )
 
