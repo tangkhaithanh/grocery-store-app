@@ -40,13 +40,18 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.store.grocery_store_app.R
 import com.store.grocery_store_app.data.models.OrderItem
+import java.text.NumberFormat
+import java.util.Locale
 
 
 @Composable
 fun OrderItemCard(
-    order: OrderItem,
+    orderItem: OrderItem,
     onNavigateToReviewProduct: (Long,Long) -> Unit,
     ) {
+    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
+        maximumFractionDigits = 0
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // ✅ Sửa ở đây
@@ -70,7 +75,7 @@ fun OrderItemCard(
                         Text("Yêu thích", color = Color.White, fontSize = 12.sp)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(order.storeName, fontWeight = FontWeight.SemiBold)
+                    Text(orderItem.storeName, fontWeight = FontWeight.SemiBold)
                 }
                 Text("Hoàn thành", color = Color.Red)
             }
@@ -80,7 +85,7 @@ fun OrderItemCard(
             Row {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(order.imageRes)
+                        .data(orderItem.imageRes)
                         .crossfade(true)
                         .build(),
                     contentDescription = null,
@@ -92,27 +97,27 @@ fun OrderItemCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(order.productName, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(order.productDescription,maxLines = 2, color = Color.Gray, fontSize = 12.sp)
-                    Text("x${order.quantity}", color = Color.Gray, fontSize = 12.sp)
+                    Text(orderItem.productName, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(orderItem.productDescription,maxLines = 2, color = Color.Gray, fontSize = 12.sp)
+                    Text("x${orderItem.quantity}", color = Color.Gray, fontSize = 12.sp)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(horizontalAlignment = Alignment.End) {
-                    if (order.sellPrice != null) {
+                    if (orderItem.sellPrice != null && orderItem.sellPrice != orderItem.buyPrice) {
                         Text(
-                            text = "₫${order.sellPrice}",
+                            text = currencyFormatter.format(orderItem.sellPrice),
                             style = TextStyle(textDecoration = TextDecoration.LineThrough),
                             color = Color.Gray,
                             fontSize = 12.sp
                         )
                     }
-                    Text("₫${order.buyPrice}", fontWeight = FontWeight.Bold)
+                    Text(currencyFormatter.format(orderItem.buyPrice), fontWeight = FontWeight.Bold)
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "Tổng số tiền (${order.quantity} sản phẩm): ₫${order.totalAmount}",
+                "Tổng số tiền (${orderItem.quantity} sản phẩm): ₫${orderItem.totalAmount}",
                 modifier = Modifier.align(Alignment.End),
                 fontWeight = FontWeight.SemiBold
             )
@@ -122,8 +127,8 @@ fun OrderItemCard(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (order.canReview == false) {
-                    if(order.reviewed==true) {
+                if (orderItem.canReview == false) {
+                    if(orderItem.reviewed==true) {
                         // Nút: Xem đánh giá
                         OutlinedButton(
                             onClick = { /* TODO: Review */ },
@@ -141,13 +146,13 @@ fun OrderItemCard(
                     ) {
                         Text("Mua lại")
                     }
-                } else if(order.reviewed== false){
+                } else if(orderItem.reviewed== false){
                     // Nút: Đánh giá nổi bật
                     Button(
                         onClick = {
                             onNavigateToReviewProduct(
-                                order.orderId.toLong(),
-                                order.orderItemId.toLong()
+                                orderItem.orderItemId.toLong(),
+                                orderItem.orderId.toLong()
                             )
                         },
                         colors = ButtonDefaults.buttonColors(

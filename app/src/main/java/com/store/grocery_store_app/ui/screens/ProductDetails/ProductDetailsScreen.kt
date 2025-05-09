@@ -1,4 +1,5 @@
 package com.store.grocery_store_app.ui.screens.ProductDetails
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.store.grocery_store_app.ui.Animation.AddToCartAnimation
 import com.store.grocery_store_app.ui.components.LoadingDialog
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.AddToCartButton
+import com.store.grocery_store_app.ui.screens.ProductDetails.components.AddToCartSheet
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.BestSellerBadge
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.ErrorContent
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.ImageThumbnails
@@ -65,7 +67,7 @@ fun ProductDetailsScreen(
     var isAnimating by remember { mutableStateOf(false) }
     var cartButtonPosition by remember { mutableStateOf(Offset.Zero) }
     var addToCartButtonPosition by remember { mutableStateOf(Offset.Zero) }
-
+    var showSheet by remember { mutableStateOf(false) }
     // Currency formatter for Vietnamese Dong
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -110,9 +112,10 @@ fun ProductDetailsScreen(
                 val remaining = product.quantity - product.soldCount
 
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     color = Color.White,
-                    shadowElevation = 8.dp
+                    shadowElevation = 8.dp,
                 ) {
                     Box(
                         modifier = Modifier
@@ -122,6 +125,7 @@ fun ProductDetailsScreen(
                     ) {
                         AddToCartButton(
                             remaining = remaining,
+                            onShowSheet = { showSheet = true },
                             onAddToCart = {
                                 if (!isAnimating &&
                                     cartButtonPosition != Offset.Zero &&
@@ -137,18 +141,28 @@ fun ProductDetailsScreen(
                                     val cy = c.positionInRoot().y + c.size.height / 2
                                     addToCartButtonPosition = Offset(cx, cy)
                                 }
-                                .fillMaxWidth()      // hoặc kích thước bạn muốn
+                                .fillMaxWidth()
+                                // hoặc kích thước bạn muốn
                         )
                     }
                 }
             }
         }
     ) { paddingValues ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            if(showSheet) {
+                Log.d("SHOW SHEET", "TEST")
+                AddToCartSheet(
+                    product = state.product!!,
+                    onDismiss = { showSheet = false},
+
+                    )
+            }
             // Show loading dialog while fetching data
             if (state.isLoading) {
                 LoadingDialog(
@@ -335,6 +349,7 @@ fun ProductDetailsScreen(
                     onAnimationEnd = ::onAnimationComplete
                 )
             }
+
         }
     }
 }

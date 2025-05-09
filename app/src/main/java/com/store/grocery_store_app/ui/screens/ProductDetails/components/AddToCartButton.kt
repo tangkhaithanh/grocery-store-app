@@ -13,7 +13,8 @@ import com.store.grocery_store_app.ui.components.CustomButtonWithIcon
 @Composable
 fun AddToCartButton(
     remaining: Int,
-    onAddToCart: () -> Unit,
+    onAddToCart: () -> Unit = {},
+    onShowSheet: () -> Unit = {},
     isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -21,7 +22,10 @@ fun AddToCartButton(
 
     CustomButtonWithIcon(
         text      = buttonText,
-        onClick   = onAddToCart,
+        onClick   = {
+            onShowSheet()
+            onAddToCart()
+        },
         isLoading = isLoading,
         enabled   = remaining > 0,
         icon      = if (remaining > 0) Icons.Default.ShoppingCart else null,
