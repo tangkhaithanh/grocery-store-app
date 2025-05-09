@@ -33,17 +33,15 @@ fun HomeScreen(
     onNavigateToOrder: () -> Unit,
     onNavigateToProductDetails: (Long) -> Unit,
     onNavigateToSearch: () -> Unit,
-    onNavigateToCart: () -> Unit = {}
+    onNavigateToCart: () -> Unit = {},
+    onNavigateToCategory: () -> Unit = {},
+    onNavigateToNotification: () -> Unit = {},
+    onNavigateToAccount: () -> Unit = {}
     ) {
     val authState by authViewModel.authState.collectAsState()
     val scrollState = rememberScrollState()
     val categoryState by categoryViewModel.state.collectAsState()
-    // Track cart button position
-    var cartPosition by remember { mutableStateOf<Offset?>(null) }
-
-    // Check if the user is logged in
     val isUserLoggedIn = authState.isLoggedIn
-
     var showProfileMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(authState.isLoggedIn) {
@@ -55,8 +53,13 @@ fun HomeScreen(
     Scaffold(
         bottomBar = {
             BottomNavigation(
-                { onNavigateToOrder() },
-                notificationCount = 10
+                onFabClick = { onNavigateToOrder() },
+                notificationCount = 10,
+                onNavigateToHome = { /* Đã ở trang Home nên không cần xử lý */ },
+                onNavigateToCategory = onNavigateToCategory,
+                onNavigateToNotification = onNavigateToNotification,
+                onNavigateToAccount = onNavigateToAccount,
+                selectedTab = 0  // Tab Home (index = 0)
             )
         }
     ) { paddingValues ->

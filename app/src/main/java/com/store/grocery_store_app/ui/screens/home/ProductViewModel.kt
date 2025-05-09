@@ -3,6 +3,7 @@ package com.store.grocery_store_app.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.store.grocery_store_app.data.models.response.ProductResponse
+import com.store.grocery_store_app.data.repository.CategoryRepository
 import com.store.grocery_store_app.data.repository.ProductRepository
 import com.store.grocery_store_app.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,12 +19,22 @@ data class ProductsState(
     val bestSellerProducts: List<ProductResponse> = emptyList(),
     val error: String? = null,
     val page: Int = 0,
-    val hasMoreItems: Boolean = true
+    val hasMoreItems: Boolean = true,
+
+    // Trạng thái của sản phẩm theo danh mục:
+    val categoryId: Long = 0,
+    val categoryName: String = "",
+    val productsByCategory: List<ProductResponse> = emptyList(),
+    val categoryProductsLoading: Boolean = false,
+    val categoryProductsError: String? = null,
+    val categoryProductsPage: Int = 0,
+    val hasMoreCategoryProducts: Boolean = true
 )
 
 @HiltViewModel
 class ProductViewModel @Inject constructor(
-    private val productRepository: ProductRepository
+    private val productRepository: ProductRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProductsState())
@@ -75,6 +86,95 @@ class ProductViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    // Thiết lập danh mục hiện tại và tải tên danh mục:
+    fun setCategoryAndLoadName(categoryId: Long) {
+        _state.update { it.copy(
+            categoryId = categoryId,
+            productsByCategory = emptyList(),
+            categoryProductsPage = 0,
+            hasMoreCategoryProducts = true
+        ) }
+        loadCategoryName(categoryId)
+        loadProductsByCategory(categoryId, 0,20,true)
+    }
+
+    // Hàm tải tên danh mục
+    private fun loadCategoryName(categoryId: Long) {
+        viewModelScope.launch {
+            categoryRepository.getCategories().collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        // Tìm danh mục có id phù hợp
+                        val category = result.data?.find { it.id == categoryId }
+                        category?.let {
+                            _state.update { state -> state.copy(categoryName = it.name) }
+                        }
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    // Hàm tải sản phẩm theo danh mục
+    fun loadProductsByCategory(categoryId: Long, page: Int = 0, size: Int = 20, refresh: Boolean = false) {
+        viewModelScope.launch {
+            if (refresh) {
+                _state.update {
+                    it.copy(
+                        productsByCategory = emptyList(),
+                        categoryProductsError = null,
+                        categoryProductsPage = 0,
+                        hasMoreCategoryProducts = true
+                    )
+                }
+            }
+
+            _state.update { it.copy(categoryProductsLoading = true, categoryProductsError = null) }
+
+            productRepository.getProductsByCategory(categoryId, page, size).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        val newProducts = result.data ?: emptyList()
+                        // Nếu không có sản phẩm mới hoặc số lượng nhỏ hơn pageSize, coi như đã hết sản phẩm
+                        val hasMore = newProducts.isNotEmpty() && newProducts.size >= size
+
+                        _state.update { state ->
+                            state.copy(
+                                productsByCategory = if (page == 0) newProducts else state.productsByCategory + newProducts,
+                                categoryProductsLoading = false,
+                                categoryProductsError = null,
+                                categoryProductsPage = page,
+                                hasMoreCategoryProducts = hasMore
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+                        _state.update { state ->
+                            state.copy(
+                                categoryProductsLoading = false,
+                                categoryProductsError = result.message
+                            )
+                        }
+                    }
+                    is Resource.Loading -> {
+                        // Đã xử lý ở trên
+                    }
+                }
+            }
+        }
+    }
+
+    fun loadNextCategoryPage() {
+        val currentState = _state.value
+        if (!currentState.categoryProductsLoading && currentState.hasMoreCategoryProducts) {
+            loadProductsByCategory(currentState.categoryId, currentState.categoryProductsPage + 1, 20)
+        }
+    }
+    fun refreshCategoryProducts() {
+        loadProductsByCategory(_state.value.categoryId, 0, 20, true)
     }
 
     fun refreshProducts() {
