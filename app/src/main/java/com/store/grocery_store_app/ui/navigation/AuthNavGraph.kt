@@ -13,6 +13,8 @@ import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
 import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
+import com.store.grocery_store_app.ui.screens.ProductsByCategory.ProductsByCategoryScreen
+import com.store.grocery_store_app.ui.screens.category.CategoryScreen
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
 import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.intro.IntroScreen
@@ -156,7 +158,17 @@ fun AuthNavGraph(
                 },
                 onNavigateToSearch = {
                     navController.navigate(Screen.Search.route)
-                }            )
+                },
+                onNavigateToCategory = {
+                    navController.navigate(Screen.Category.route)
+                },
+                onNavigateToNotification = {
+                    // Xử lý điều hướng đến thông báo nếu có
+                },
+                onNavigateToAccount = {
+                    // Xử lý điều hướng đến tài khoản nếu có
+                }
+            )
         }
 
         // Order Screen
@@ -259,6 +271,49 @@ fun AuthNavGraph(
                 }
             )
 
+        }
+        composable(route = Screen.Category.route) {
+            CategoryScreen(
+                onNavigateToProductsByCategory = { categoryId ->
+                    navController.navigate(Screen.ProductsByCategory.createRoute(categoryId))
+                },
+                onNavigateToOrder = {
+                    navController.navigate(Screen.Order.route)
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        // Làm sạch stack khi chuyển tab
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
+                },
+                onNavigateToNotification = {
+                    // Điều hướng đến màn hình thông báo (nếu có)
+                    // Nếu chưa có, bạn có thể hiển thị Snackbar thông báo
+                },
+                onNavigateToAccount = {
+                    // Điều hướng đến màn hình tài khoản (nếu có)
+                }
+            )
+        }
+
+        composable(
+            route = Screen.ProductsByCategory.route,
+            arguments = listOf(navArgument("categoryId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: 0L
+
+            ProductsByCategoryScreen(
+                categoryId = categoryId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToProductDetails = { productId ->
+                    navController.navigate(Screen.ProductDetails.createRoute(productId))
+                }
+            )
         }
     }
 }
