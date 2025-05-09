@@ -31,7 +31,12 @@ import com.store.grocery_store_app.R
 @Composable
 fun BottomNavigation(
     onFabClick: () -> Unit,
-    notificationCount: Int = 0
+    notificationCount: Int = 0,
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToCategory: () -> Unit = {},
+    onNavigateToNotification: () -> Unit = {},
+    onNavigateToAccount: () -> Unit = {},
+    selectedTab: Int = 0
 ) {
     var selectedIndex by remember { mutableStateOf(0) }
     val items = listOf(
@@ -40,6 +45,11 @@ fun BottomNavigation(
         NavigationItem("Notification", Icons.Default.Notifications, badgeCount = notificationCount),
         NavigationItem("Account", Icons.Default.AccountCircle)
     )
+
+    // Đặt lại giá trị selectedIndex mỗi khi selectedTab thay đổi
+    LaunchedEffect(selectedTab) {
+        selectedIndex = selectedTab
+    }
 
     Box {
         Card(
@@ -58,24 +68,47 @@ fun BottomNavigation(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                items.take(2).forEachIndexed { index, item ->
-                    BottomNavItem(
-                        item = item,
-                        selected = (selectedIndex == index),
-                        onClick = { selectedIndex = index }
-                    )
-                }
+                // Tab Home
+                BottomNavItem(
+                    item = items[0],
+                    selected = (selectedIndex == 0),
+                    onClick = {
+                        selectedIndex = 0
+                        onNavigateToHome()
+                    }
+                )
+
+                // Tab Categories
+                BottomNavItem(
+                    item = items[1],
+                    selected = (selectedIndex == 1),
+                    onClick = {
+                        selectedIndex = 1
+                        onNavigateToCategory()
+                    }
+                )
 
                 Spacer(modifier = Modifier.width(64.dp)) // chỗ cho FAB
 
-                items.drop(2).forEachIndexed { offset, item ->
-                    val index = offset + 2
-                    BottomNavItem(
-                        item = item,
-                        selected = (selectedIndex == index),
-                        onClick = { selectedIndex = index }
-                    )
-                }
+                // Tab Notification
+                BottomNavItem(
+                    item = items[2],
+                    selected = (selectedIndex == 2),
+                    onClick = {
+                        selectedIndex = 2
+                        onNavigateToNotification()
+                    }
+                )
+
+                // Tab Account
+                BottomNavItem(
+                    item = items[3],
+                    selected = (selectedIndex == 3),
+                    onClick = {
+                        selectedIndex = 3
+                        onNavigateToAccount()
+                    }
+                )
             }
         }
 
