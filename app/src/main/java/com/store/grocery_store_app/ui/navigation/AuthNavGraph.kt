@@ -1,4 +1,5 @@
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.internal.composableLambda
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -15,6 +16,7 @@ import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
 import com.store.grocery_store_app.ui.screens.ProductsByCategory.ProductsByCategoryScreen
 import com.store.grocery_store_app.ui.screens.category.CategoryScreen
+import com.store.grocery_store_app.ui.screens.cart.CartScreen
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
 import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.intro.IntroScreen
@@ -167,6 +169,11 @@ fun AuthNavGraph(
                 },
                 onNavigateToAccount = {
                     // Xử lý điều hướng đến tài khoản nếu có
+                },
+                onNavigateToCart = {
+                    navController.navigate(Screen.Cart.route) {
+                        popUpTo(Screen.Cart.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -314,6 +321,17 @@ fun AuthNavGraph(
                     navController.navigate(Screen.ProductDetails.createRoute(productId))
                 }
             )
+        }
+
+        composable(route = Screen.Cart.route) {
+            CartScreen(
+                onHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
+            )
+
         }
     }
 }

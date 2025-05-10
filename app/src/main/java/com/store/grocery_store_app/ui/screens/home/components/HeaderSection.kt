@@ -43,7 +43,7 @@ fun HeaderSection(
     onCartClick: () -> Unit = {},
     onNavigateToSearch: () -> Unit,
     cartItemCount: Int? = null,
-    locationName: String
+    locationName: String,
 ) {
     Box(
         modifier = Modifier
@@ -82,7 +82,7 @@ fun HeaderSection(
                     CartButton(
                         itemCount = cartItemCount,
                         onClick   = onCartClick,
-                        modifier  = Modifier.padding(start = 8.dp)
+                        modifier  = Modifier.padding(start = 8.dp),
                     )
                 }
             }

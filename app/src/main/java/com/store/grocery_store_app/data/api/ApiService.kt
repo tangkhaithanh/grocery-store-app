@@ -2,6 +2,7 @@ package com.store.grocery_store_app.data.api
 
 import com.store.grocery_store_app.data.models.StatusOrderType
 import com.store.grocery_store_app.data.models.request.AuthRequest
+import com.store.grocery_store_app.data.models.request.CartItemRequest
 import com.store.grocery_store_app.data.models.request.ForgotPasswordRequest
 import com.store.grocery_store_app.data.models.request.OtpRequest
 import com.store.grocery_store_app.data.models.request.OtpVerifyRequest
@@ -9,6 +10,7 @@ import com.store.grocery_store_app.data.models.request.RegisterRequest
 import com.store.grocery_store_app.data.models.request.ReviewRequest
 import com.store.grocery_store_app.data.models.response.ApiResponse
 import com.store.grocery_store_app.data.models.response.AuthResponse
+import com.store.grocery_store_app.data.models.response.CartResponse
 import com.store.grocery_store_app.data.models.response.CategoryResponse
 import com.store.grocery_store_app.data.models.response.OrderItemResponse
 import com.store.grocery_store_app.data.models.response.OrderResponse
@@ -118,4 +120,12 @@ interface ApiService {
         @Body reviewRequest : ReviewRequest,
         @Query("orderItemId") orderItemId : Long
     ) : Response<ApiResponse<Any>>
+
+    @POST("carts/addToCart")
+    suspend fun insertProductIntoCart(
+        @Body cartItemRequest: CartItemRequest
+    ) : Response<ApiResponse<Any>>
+
+    @GET("carts")
+    suspend fun getAllCartItem() : Response<ApiResponse<CartResponse>>
 }

@@ -6,6 +6,7 @@ import com.store.grocery_store_app.data.api.AuthInterceptor
 import com.store.grocery_store_app.data.api.CloudinaryService
 import com.store.grocery_store_app.data.local.TokenManager
 import com.store.grocery_store_app.data.repository.AuthRepository
+import com.store.grocery_store_app.data.repository.CartRepository
 import com.store.grocery_store_app.data.repository.CategoryRepository
 import com.store.grocery_store_app.data.repository.CloudinaryRepository
 import com.store.grocery_store_app.data.repository.FavoriteProductRepository
@@ -14,6 +15,7 @@ import com.store.grocery_store_app.data.repository.OrderRepository
 import com.store.grocery_store_app.data.repository.ProductRepository
 import com.store.grocery_store_app.data.repository.ReviewRepository
 import com.store.grocery_store_app.data.repository.impl.AuthRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.CartRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CategoryRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CloudinaryRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.FavoriteProductRepositoryImpl
@@ -161,5 +163,11 @@ object AppModule {
     @Singleton
     fun provideCloudinaryRepository(cloudinaryService: CloudinaryService, @ApplicationContext context: Context): CloudinaryRepository {
         return CloudinaryRepositoryImpl(cloudinaryService, context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCartRepository(apiService: ApiService): CartRepository {
+        return CartRepositoryImpl(apiService)
     }
 }
