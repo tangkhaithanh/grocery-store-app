@@ -33,9 +33,9 @@ class CartViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(CartState())
     val state: StateFlow<CartState> = _state.asStateFlow()
-    init {
-        getAllCartItem()
-    }
+//    init {
+//        getAllCartItem()
+//    }
     fun insertProductIntoCart(idCart: Long?, flashSaleId: Long?, quantity:Int, priceCart: BigDecimal,
                               idProduct:Long, name: String, priceProduct: BigDecimal, imageUrl: String?) {
         viewModelScope.launch {

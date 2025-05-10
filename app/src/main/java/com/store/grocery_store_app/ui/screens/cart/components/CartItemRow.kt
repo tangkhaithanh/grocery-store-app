@@ -248,7 +248,6 @@ fun SwipeableCartItemRow(
         if (isRevealed) Color(0xFFF44336) else Color.Transparent,
         animationSpec = tween(300), label = "delete"
     )
-    SwipeToDismissBox()
     SwipeToDismiss(
         state = dismissState,
         directions = setOf(

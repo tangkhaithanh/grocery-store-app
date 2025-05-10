@@ -26,6 +26,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults.centerAlignedTopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -63,7 +64,9 @@ fun CartScreen(
     }
     val state by cartViewModel.state.collectAsState()
     val cartItems = state.cartItems
-
+    LaunchedEffect(Unit) {
+        cartViewModel.getAllCartItem()
+    }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
