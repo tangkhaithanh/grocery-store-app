@@ -137,7 +137,9 @@ fun OrderScreen(
                     }
                 }
                 else -> {
-                    item { EmptyCategoryView() }
+                    item { EmptyCategoryView(
+                        content = "Bạn chưa có đơn hàng nào!!!"
+                    ) }
                 }
             }
 

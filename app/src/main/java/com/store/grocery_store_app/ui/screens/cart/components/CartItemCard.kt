@@ -48,7 +48,9 @@ import com.store.grocery_store_app.data.models.request.CartItemRequest
 
 @Composable
 fun CartItemCard(
-    cartItem : CartItemRequest
+    cartItem : CartItemRequest,
+    checked : Boolean = false,
+    onCheckedChange : (Boolean) -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -82,8 +84,10 @@ fun CartItemCard(
 
             SwipeableCartItemRow(
                 cartItem = cartItem,
+                checked = checked,
                 onDelete = {},
-                onShowSimilar = {}
+                onShowSimilar = {},
+                onCheckedChange = onCheckedChange
             )
         }
     }

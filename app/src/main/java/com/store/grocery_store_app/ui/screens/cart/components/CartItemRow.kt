@@ -76,8 +76,9 @@ import kotlin.math.roundToInt
 @Composable
 fun CartItemRow(
     cartItem : CartItemRequest,
+    checked : Boolean = false,
+    onCheckedChange: (Boolean) -> Unit
 ) {
-    var checked by remember { mutableStateOf(false) }
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
     }
@@ -89,8 +90,8 @@ fun CartItemRow(
     ) {
         Checkbox(
             checked = checked,
-            onCheckedChange = {
-                checked = !checked
+            onCheckedChange = { isChecked ->
+                onCheckedChange(isChecked)
             }
         )
         AsyncImage(
@@ -229,8 +230,10 @@ fun QuantityPicker(
 @Composable
 fun SwipeableCartItemRow(
     cartItem: CartItemRequest,
+    checked: Boolean = false,
     onDelete: () -> Unit,
-    onShowSimilar: () -> Unit
+    onShowSimilar: () -> Unit,
+    onCheckedChange: (Boolean) -> Unit
 ) {
     val dismissState = rememberDismissState(
         confirmValueChange = {
@@ -297,7 +300,11 @@ fun SwipeableCartItemRow(
             }
         },
         dismissContent = {
-            CartItemRow(cartItem = cartItem)
+            CartItemRow(
+                cartItem = cartItem,
+                checked = checked,
+                onCheckedChange = onCheckedChange
+            )
         },
         modifier = Modifier.padding(vertical = 4.dp)
     )

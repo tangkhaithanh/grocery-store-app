@@ -1,5 +1,6 @@
 package com.store.grocery_store_app.ui.screens.cart
 
+import EmptyCategoryView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -64,6 +65,8 @@ fun CartScreen(
     }
     val state by cartViewModel.state.collectAsState()
     val cartItems = state.cartItems
+    val isCartChecked = cartViewModel.isCartChecked.value
+    val itemCheckedMap = cartViewModel.itemCheckedMap
     LaunchedEffect(Unit) {
         cartViewModel.getAllCartItem()
     }
@@ -72,7 +75,7 @@ fun CartScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Giỏ hàng (18)",
+                        text = "Giỏ hàng (${cartItems.size})",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -170,8 +173,10 @@ fun CartScreen(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
-                                checked = false,
-                                onCheckedChange = { /* TODO: handle select all */ },
+                                checked = isCartChecked,
+                                onCheckedChange = {
+                                    cartViewModel.updateCartChecked(it)
+                                },
                                 colors = CheckboxDefaults.colors(
                                     checkedColor = MaterialTheme.colorScheme.primary,
                                     uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -186,10 +191,10 @@ fun CartScreen(
                             )
                         }
 
-                        Row(verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(
-                                end = 8.dp
-                            )) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+
+                        ) {
                             Column(horizontalAlignment = Alignment.End) {
                                 Text(
                                     text = "Tổng cộng",
@@ -202,12 +207,16 @@ fun CartScreen(
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
+                            Spacer(modifier = Modifier.width(8.dp))
                             Button(
                                 onClick = { /* TODO: purchase */ },
+                                modifier = Modifier
+                                    .wrapContentHeight()
+                                    .wrapContentWidth()
                             ) {
                                 Text(
-                                    text = "Mua hàng (0)",
-                                    fontSize = 10.sp
+                                    text = "Mua hàng (${itemCheckedMap.count{ it.value }})",
+                                    fontSize = 12.sp
                                 )
                             }
                         }
@@ -227,8 +236,22 @@ fun CartScreen(
         ) {
             if(cartItems.isNotEmpty()) {
                 items(cartItems) { item ->
-                    CartItemCard(item)
+                    val checked = itemCheckedMap[item.id ?: -1L] == true
+                    CartItemCard(
+                        item,
+                        checked = checked,
+                        onCheckedChange = { isChecked ->
+                            cartViewModel.updateItemChecked(item.id, isChecked)
+                        }
+                    )
                     Spacer(modifier = Modifier.height(5.dp))
+                }
+            }
+            else {
+                item {
+                    EmptyCategoryView(
+                        content = "Bạn chưa có sản phẩm nào trong giỏ hàng"
+                    )
                 }
             }
 
