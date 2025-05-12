@@ -1,6 +1,7 @@
 package com.store.grocery_store_app.ui.screens.cart
 
 import EmptyCategoryView
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -51,6 +52,8 @@ import coil.request.ImageRequest
 import com.store.grocery_store_app.R
 import com.store.grocery_store_app.ui.screens.cart.components.CartItemCard
 import com.store.grocery_store_app.ui.screens.cart.components.CartItemRow
+import com.store.grocery_store_app.ui.screens.checkout.Product
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -58,7 +61,9 @@ import java.util.Locale
 @Composable
 fun CartScreen(
     onHome: () -> Unit,
-    cartViewModel: CartViewModel = hiltViewModel()
+    cartViewModel: CartViewModel = hiltViewModel(),
+    onPayment: (List<Product>) -> Unit = {},
+    onNavigateVoucher: () -> Unit = {}
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -143,7 +148,9 @@ fun CartScreen(
                         )
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.alpha(0.6f)
+                            modifier = Modifier.alpha(0.6f).clickable {
+                                onNavigateVoucher()
+                            }
                         ) {
                             Text(
                                 text = "Chọn hoặc nhập mã",
@@ -209,7 +216,25 @@ fun CartScreen(
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
-                                onClick = { /* TODO: purchase */ },
+                                onClick = {
+                                    val selectedProducts = cartItems
+                                        .filter { itemCheckedMap[it.id ?: -1L] == true }
+                                        .map {
+                                            Log.d("CartItem Price: ", it.price.toInt().toString())
+                                            Product(
+                                                id = it.product.id,
+                                                name = it.product.name,
+                                                price = it.price.setScale(0, RoundingMode.HALF_UP).toInt(),
+                                                imageUrl = if (it.product.imageUrls.isNotEmpty()) {
+                                                    it.product.imageUrls[0]
+                                                } else {
+                                                    "https://onelife.vn/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fsc_pcm_product%2Fprod%2F2023%2F12%2F15%2F19248-8936079121822.jpg&w=1920&q=75"
+                                                },
+                                                quantity = it.quantity
+                                            )
+                                        }
+                                    onPayment(selectedProducts) // Gọi hàm điều hướng đã truyền vào
+                                },
                                 modifier = Modifier
                                     .wrapContentHeight()
                                     .wrapContentWidth()

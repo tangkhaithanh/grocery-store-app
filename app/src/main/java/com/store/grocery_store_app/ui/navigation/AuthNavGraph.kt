@@ -1,3 +1,6 @@
+import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.internal.composableLambda
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -6,6 +9,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.google.android.gms.maps.model.LatLng
+import com.google.gson.Gson
 import com.store.grocery_store_app.ui.screens.EmailVerification.EmailVerificationScreen
 import com.store.grocery_store_app.ui.screens.login.LoginScreen
 import com.store.grocery_store_app.ui.screens.otp.OtpVerificationScreen
@@ -15,16 +20,23 @@ import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
 import com.store.grocery_store_app.ui.screens.ProductsByCategory.ProductsByCategoryScreen
+import com.store.grocery_store_app.ui.screens.address.Address
+import com.store.grocery_store_app.ui.screens.address.AddressListScreen
+import com.store.grocery_store_app.ui.screens.address.EditAddressScreen
 import com.store.grocery_store_app.ui.screens.category.CategoryScreen
 import com.store.grocery_store_app.ui.screens.cart.CartScreen
+import com.store.grocery_store_app.ui.screens.checkout.CheckoutScreen
+import com.store.grocery_store_app.ui.screens.checkout.Product
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
 import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.intro.IntroScreen
 import com.store.grocery_store_app.ui.screens.order.OrderScreen
 import com.store.grocery_store_app.ui.screens.reviews.ReviewProductScreen
 import com.store.grocery_store_app.ui.screens.splash.SplashScreen
+import com.store.grocery_store_app.ui.screens.voucher.VoucherScreen
 import com.store.grocery_store_app.utils.AuthPurpose
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AuthNavGraph(
     navController: NavHostController,
@@ -244,6 +256,11 @@ fun AuthNavGraph(
                             inclusive = true
                         }
                     }
+                },
+                onNavigateToCart = {
+                    navController.navigate(Screen.Cart.route) {
+                        popUpTo(Screen.Cart.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -329,9 +346,106 @@ fun AuthNavGraph(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
+                },
+                onPayment = { selectedProducts ->
+                    val selectedProductsJson = Uri.encode(Gson().toJson(selectedProducts)) // encode để tránh lỗi URL
+                    navController.navigate(Screen.CheckOut.createRoute(selectedProductsJson))
+                },
+                onNavigateVoucher = {
+                    navController.navigate(Screen.Voucher.route) {
+                        popUpTo(Screen.Voucher.route) { inclusive = true }
+                    }
                 }
             )
 
+        }
+
+        composable(
+            route = Screen.CheckOut.route,
+            arguments = listOf(navArgument("selectedProductsJson") { type = NavType.StringType })
+        ) { backStackEntry ->
+            // Lấy chuỗi JSON từ tham số route
+            val selectedProductsJson = backStackEntry.arguments?.getString("selectedProductsJson") ?: "[]"
+
+            // Chuyển đổi chuỗi JSON thành danh sách sản phẩm
+            val selectedProducts = Gson().fromJson(selectedProductsJson, Array<Product>::class.java).toList()
+
+            // Hiển thị CheckOutScreen với các sản phẩm đã chọn
+            CheckoutScreen(
+                products = selectedProducts,
+                voucher = null,
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onNavigateAddress = {
+                    navController.navigate(Screen.Address.route) {
+                        popUpTo(Screen.Address.route) { inclusive = true }
+                    }
+                },
+                onNavigateVoucher = {
+                    navController.navigate(Screen.Voucher.route) {
+                        popUpTo(Screen.Voucher.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(route = Screen.Address.route) {
+            val sampleAddresses = listOf(
+                Address(
+                    id = "1",
+                    recipient = "Nguyễn Văn A",
+                    phone = "0901234567",
+                    street = "123 Lý Thường Kiệt",
+                    building = "Tòa nhà ABCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+                    province = "TP.HCM",
+                    district = "Quận 10",
+                    ward = "Phường 5",
+                    latLng = null
+                ),
+                Address(
+                    id = "2",
+                    recipient = "Trần Thị B",
+                    phone = "0912345678",
+                    street = "456 Hai Bà Trưng",
+                    building = "Chung cư XYZ",
+                    province = "Hà Nội",
+                    district = "Quận Hoàn Kiếm",
+                    ward = "Phường Hàng Bạc",
+                    latLng = null
+                )
+            )
+            AddressListScreen (
+                addresses = sampleAddresses,
+                selectedId = "1",
+                onSelect = {},
+                onEdit = { addressId ->
+                    navController.navigate(Screen.EditAddress.createRoute(addressId))
+                }
+            )
+        }
+        composable(
+            route = Screen.EditAddress.route,
+            arguments = listOf(navArgument("addressId") { type = NavType.LongType })) {
+            val sample = Address(
+                id = "1",
+                recipient = "Nguyễn Văn A",
+                phone = "0901234567",
+                street = "123 Lý Thường Kiệt",
+                building = "Tòa nhà ABC",
+                province = "TP.HCM",
+                district = "Quận 10",
+                ward = "Phường 5",
+                latLng = LatLng(10.762622, 106.660172)
+            )
+            EditAddressScreen(
+                address = sample,
+                onSave = {}
+            )
+        }
+        composable(route = Screen.Voucher.route) {
+            VoucherScreen (
+                onConfirm = {},
+            )
         }
     }
 }

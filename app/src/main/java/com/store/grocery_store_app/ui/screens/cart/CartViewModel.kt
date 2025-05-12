@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.store.grocery_store_app.data.models.OrderItem
 import com.store.grocery_store_app.data.models.request.CartItemRequest
 import com.store.grocery_store_app.data.models.request.ProductSimpleRequest
+import com.store.grocery_store_app.data.models.response.CartItemResponse
 import com.store.grocery_store_app.data.models.response.CartResponse
 import com.store.grocery_store_app.data.models.response.OrderResponse
 import com.store.grocery_store_app.data.repository.CartRepository
@@ -22,7 +23,7 @@ import javax.inject.Inject
 
 data class CartState(
     val carts: CartResponse? = null,
-    val cartItems: List<CartItemRequest> = emptyList(),
+    val cartItems: List<CartItemResponse> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val isSuccess: Boolean = false
@@ -141,4 +142,13 @@ class CartViewModel @Inject constructor(
     fun clearError() {
         _state.update { it.copy(error = null) }
     }
+    fun getSelectedProductIds(): List<Long> {
+        return _state.value.cartItems
+            .filter { cartItem ->
+                val itemId = cartItem.id ?: return@filter false
+                _itemCheckedMap[itemId] == true
+            }
+            .mapNotNull { it.product?.id }
+    }
+
 }

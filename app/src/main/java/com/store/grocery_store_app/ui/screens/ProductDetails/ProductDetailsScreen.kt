@@ -160,7 +160,7 @@ fun ProductDetailsScreen(
                 AddToCartSheet(
                     product = state.product!!,
                     onDismiss = { showSheet = false},
-
+                    onNavigateToCart = onNavigateToCart
                     )
             }
             // Show loading dialog while fetching data

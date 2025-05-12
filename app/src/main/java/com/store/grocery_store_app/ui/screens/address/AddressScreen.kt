@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.LatLng
 
 
 // Data model for Address
@@ -30,8 +31,10 @@ data class Address(
     val building: String,
     val province: String,
     val district: String,
-    val ward: String
+    val ward: String,
+    val latLng : LatLng?
 )
+private val DeepTeal = Color(0xFF004D40)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +42,7 @@ fun AddressListScreen(
     addresses: List<Address>,
     selectedId: String?,
     onSelect: (String) -> Unit,
-    onEdit: (Address) -> Unit
+    onEdit: (Long) -> Unit
 ) {
     var selected by remember { mutableStateOf(selectedId) }
 
@@ -49,9 +52,16 @@ fun AddressListScreen(
                 title = { Text("Địa chỉ giao hàng") },
                 navigationIcon = {
                     IconButton(onClick = {}) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = DeepTeal
+                )
             )
         }
     ) { paddingValues ->
@@ -100,7 +110,7 @@ fun AddressListScreen(
                             )
                             Text(text = "${address.province}, ${address.district}, ${address.ward}")
                         }
-                        IconButton(onClick = { onEdit(address) }) {
+                        IconButton(onClick = { onEdit(address.id.toLong()) }) {
                             Icon(Icons.Default.Edit, contentDescription = "Edit")
                         }
                     }
@@ -127,7 +137,8 @@ fun AddressListScreenPreview() {
             building = "Tòa nhà ABCCCCCCCCCCCCCCCCCCCCCCCCCCC",
             province = "TP.HCM",
             district = "Quận 10",
-            ward = "Phường 5"
+            ward = "Phường 5",
+            latLng = null
         ),
         Address(
             id = "2",
@@ -137,7 +148,8 @@ fun AddressListScreenPreview() {
             building = "Chung cư XYZ",
             province = "Hà Nội",
             district = "Quận Hoàn Kiếm",
-            ward = "Phường Hàng Bạc"
+            ward = "Phường Hàng Bạc",
+            latLng = null
         )
     )
     AddressListScreen(
@@ -147,19 +159,3 @@ fun AddressListScreenPreview() {
         onEdit = {}
     )
 }
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun EditAddressScreenPreview() {
-//    val address = Address(
-//        id = "1",
-//        recipient = "Nguyễn Văn A",
-//        phone = "0901234567",
-//        street = "123 Lý Thường Kiệt",
-//        building = "Tòa nhà ABC",
-//        province = "TP.HCM",
-//        district = "Quận 10",
-//        ward = "Phường 5"
-//    )
-//
-//}

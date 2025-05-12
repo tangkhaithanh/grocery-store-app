@@ -50,6 +50,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.store.grocery_store_app.ui.screens.address.Address
 
 @OptIn(ExperimentalMaterial3Api::class)
 private val DeepTeal = Color(0xFF004D40)
@@ -60,8 +62,10 @@ private val OffWhite = Color(0xFFF5F5F5)
 fun CheckoutScreen(
     products: List<Product>,
     voucher: Voucher?,
-    onBackClick: () -> Unit,
-    onPlaceOrderClick: () -> Unit
+    onBackClick: () -> Unit = {},
+    onPlaceOrderClick: () -> Unit = {},
+    onNavigateAddress: () -> Unit = {},
+    onNavigateVoucher: () -> Unit = {}
 ) {
     val totalGoods = products.sumOf { it.price * it.quantity }
     val shippingFee = 30000
@@ -139,7 +143,10 @@ fun CheckoutScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 4.dp)
+                        .clickable {
+                            onNavigateAddress()
+                        },
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     shape = RoundedCornerShape(8.dp),
                     elevation = CardDefaults.cardElevation(2.dp)
@@ -322,10 +329,15 @@ fun ProductItem(product: Product) {
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
-                .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                .size(56.dp)
+                .background(Color.LightGray, shape = RoundedCornerShape(6.dp))
         ) {
-            // Placeholder image
+            AsyncImage(
+                model = if(product.imageUrl.isEmpty()) "https://onelife.vn/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fsc_pcm_product%2Fprod%2F2023%2F12%2F15%2F19248-8936079121822.jpg&w=1920&q=75"
+                else product.imageUrl,
+                contentDescription = null,
+                modifier = Modifier.size(56.dp)
+            )
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -338,9 +350,11 @@ fun ProductItem(product: Product) {
 
 
 data class Product(
+    val id: Long,
     val name: String,
     val price: Int,
-    val quantity: Int
+    val quantity: Int,
+    val imageUrl : String
 )
 
 data class Voucher(
@@ -351,9 +365,9 @@ data class Voucher(
 @Composable
 fun CheckoutScreenPreview() {
     val sampleProducts = listOf(
-        Product(name = "Áo thun nam", price = 120000, quantity = 2),
-        Product(name = "Quần jean nữ", price = 250000, quantity = 1),
-        Product(name = "Giày thể thao", price = 500000, quantity = 1)
+        Product(id= 1,name = "Áo thun nam", price = 120000, quantity = 2, imageUrl = ""),
+        Product(id= 2,name = "Quần jean nữ", price = 250000, quantity = 1, imageUrl = ""),
+        Product(id= 3,name = "Giày thể thao", price = 500000, quantity = 1,  imageUrl = "")
     )
 
     val sampleVoucher = Voucher(code = "GIAM50K", discountAmount = 50000)

@@ -104,6 +104,7 @@ fun AddToCartSheet(
                 title = "Thêm thành công",
                 content = "Sản phẩm đã được thêm vào giỏ hàng",
                 clearError = cartViewModel::clearError,
+                confirmButtonRequest = onNavigateToCart
             )
         }
         if(cartState.error!=null) {
@@ -276,7 +277,7 @@ fun AddToCartSheet(
                 remaining = product.quantity - product.soldCount,
                 onAddToCart = {
                     var img : String? = null
-                    if(product.imageUrls.size == 0) {
+                    if(product.imageUrls.isNotEmpty()) {
                         img = product.imageUrls.get(0)
                     }
                     cartViewModel.insertProductIntoCart(

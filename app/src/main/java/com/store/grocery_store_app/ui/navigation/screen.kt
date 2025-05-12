@@ -1,5 +1,7 @@
 package com.store.grocery_store_app.ui.navigation
 
+import com.google.gson.Gson
+import com.store.grocery_store_app.ui.screens.checkout.Product
 import com.store.grocery_store_app.utils.AuthPurpose
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -57,4 +59,16 @@ sealed class Screen(val route: String) {
     object ProductsByCategory : Screen("products_by_category/{categoryId}") {
         fun createRoute(categoryId: Long): String = "products_by_category/$categoryId"
     }
+
+    object CheckOut : Screen("checkout/{selectedProductsJson}") {
+        fun createRoute(selectedProductsJson: String): String {
+            return "checkout/$selectedProductsJson"
+        }
+    }
+
+    object Address: Screen("address")
+    object EditAddress: Screen("edit_address/{addressId}") {
+        fun createRoute(addressId: Long): String = "edit_address/$addressId"
+    }
+    object Voucher: Screen("voucher")
 }

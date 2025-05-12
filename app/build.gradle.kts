@@ -111,5 +111,8 @@ dependencies {
     //Upload to Cloudinary
     implementation("androidx.activity:activity-ktx:1.4.0")
     implementation("com.cloudinary:cloudinary-android:2.0.0")
-
+    // https://mvnrepository.com/artifact/com.google.maps.android/maps-compose
+    implementation("com.google.maps.android:maps-compose:5.0.0")
+    // https://mvnrepository.com/artifact/com.google.android.gms/play-services-maps
+    implementation("com.google.android.gms:play-services-maps:17.0.0")
 }
