@@ -30,6 +30,7 @@ import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScree
 import com.store.grocery_store_app.ui.screens.ProductsByCategory.ProductsByCategoryScreen
 import com.store.grocery_store_app.ui.screens.register.RegisterScreen
 import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
+import com.store.grocery_store_app.ui.screens.profile.ProfileScreen
 import com.store.grocery_store_app.ui.screens.reviews.ReviewProductScreen
 import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.splash.SplashScreen
@@ -330,18 +331,23 @@ fun AuthNavGraph(
             )
         }
 
-        // CheckOut Screen
         composable(
             route = Screen.CheckOut.route,
             arguments = listOf(navArgument("selectedProductsJson") { type = NavType.StringType })
         ) { backStackEntry ->
+            // Lấy chuỗi JSON từ tham số route
             val selectedProductsJson = backStackEntry.arguments?.getString("selectedProductsJson") ?: "[]"
-            val selectedProducts     = Gson().fromJson(selectedProductsJson, Array<Product>::class.java).toList()
 
+            // Chuyển đổi chuỗi JSON thành danh sách sản phẩm
+            val selectedProducts = Gson().fromJson(selectedProductsJson, Array<Product>::class.java).toList()
+
+            // Hiển thị CheckOutScreen với các sản phẩm đã chọn
             CheckoutScreen(
                 products = selectedProducts,
                 voucher = null,
-                onBackClick = { navController.popBackStack() },
+                onBackClick = {
+                    navController.popBackStack()
+                },
                 onNavigateAddress = {
                     navController.navigate(Screen.Address.route) {
                         popUpTo(Screen.Address.route) { inclusive = true }
@@ -432,7 +438,20 @@ fun AuthNavGraph(
                 },
                 onNavigateToCategory = { navController.navigate(Screen.Category.route) },
                 onNavigateToNotification = { /* TODO */ },
-                onNavigateToOrder = { navController.navigate(Screen.Order.route) }
+                onNavigateToOrder = { navController.navigate(Screen.Order.route) } ,
+                onNavigateToProfile = {
+                    navController.navigate(Screen.Profile.route)
+                }
+
+            )
+        }
+
+        // Profile Screen
+        composable(route = Screen.Profile.route) {
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
             )
         }
     }

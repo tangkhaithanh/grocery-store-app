@@ -5,5 +5,6 @@ data class AuthResponse (
     val refreshToken: String,
     val fullName: String,
     val email: String,
-    val imageUrl: String? // có thể null được
+    val imageUrl: String?, // có thể null được
+    val userId: Long
 )

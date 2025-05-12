@@ -14,6 +14,7 @@ import com.store.grocery_store_app.data.repository.OrderItemRepository
 import com.store.grocery_store_app.data.repository.OrderRepository
 import com.store.grocery_store_app.data.repository.ProductRepository
 import com.store.grocery_store_app.data.repository.ReviewRepository
+import com.store.grocery_store_app.data.repository.UserRepository
 import com.store.grocery_store_app.data.repository.VoucherRepository
 import com.store.grocery_store_app.data.repository.impl.AuthRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CartRepositoryImpl
@@ -24,6 +25,8 @@ import com.store.grocery_store_app.data.repository.impl.OrderItemRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.OrderRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.ProductRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.ReviewRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.SharedUserRepository
+import com.store.grocery_store_app.data.repository.impl.UserRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.VoucherRepositoryImpl
 import com.store.grocery_store_app.utils.Constants
 import dagger.Module
@@ -177,5 +180,17 @@ object AppModule {
     @Singleton
     fun provideVoucherRepository(apiService: ApiService): VoucherRepository {
         return VoucherRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(apiService: ApiService): UserRepository {
+        return UserRepositoryImpl(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedUserRepository(): SharedUserRepository {
+        return SharedUserRepository()
     }
 }

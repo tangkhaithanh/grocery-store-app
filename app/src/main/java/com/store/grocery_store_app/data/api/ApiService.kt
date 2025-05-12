@@ -8,6 +8,7 @@ import com.store.grocery_store_app.data.models.request.OtpRequest
 import com.store.grocery_store_app.data.models.request.OtpVerifyRequest
 import com.store.grocery_store_app.data.models.request.RegisterRequest
 import com.store.grocery_store_app.data.models.request.ReviewRequest
+import com.store.grocery_store_app.data.models.request.UpdateUserRequest
 import com.store.grocery_store_app.data.models.response.ApiResponse
 import com.store.grocery_store_app.data.models.response.AuthResponse
 import com.store.grocery_store_app.data.models.response.CartResponse
@@ -18,12 +19,14 @@ import com.store.grocery_store_app.data.models.response.PagedResponse
 import com.store.grocery_store_app.data.models.response.ProductResponse
 import com.store.grocery_store_app.data.models.response.ReviewResponse
 import com.store.grocery_store_app.data.models.response.ReviewStatsResponse
+import com.store.grocery_store_app.data.models.response.UserDTO
 import com.store.grocery_store_app.data.models.response.VoucherResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -132,4 +135,12 @@ interface ApiService {
 
     @GET("vouchers")
     suspend fun getAllVoucher() : Response<ApiResponse<List<VoucherResponse>>>
+
+    // API for user:
+    @GET("user/{id}")
+    suspend fun getUserById(@Path("id") id: Long): Response<ApiResponse<UserDTO>>
+
+    @PUT("user/update/{id}")
+    suspend fun updateUser(@Path("id") id: Long, @Body request: UpdateUserRequest): Response<ApiResponse<UserDTO>>
+
 }

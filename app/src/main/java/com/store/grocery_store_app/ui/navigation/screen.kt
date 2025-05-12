@@ -75,8 +75,8 @@ sealed class Screen(val route: String) {
          * Pass a JSON string (already encoded/escaped if necessary).
          */
         fun createRoute(selectedProductsJson: String): String {
-            val encoded = URLEncoder.encode(selectedProductsJson, StandardCharsets.UTF_8.toString())
-            return "checkout/$encoded"
+            //val encoded = URLEncoder.encode(selectedProductsJson, StandardCharsets.UTF_8.toString())
+            return "checkout/$selectedProductsJson"
         }
 
         /**
@@ -104,5 +104,7 @@ sealed class Screen(val route: String) {
     /* -------------------- Account -------------------- */
 
     object Account : Screen("account")
+
+    object Profile : Screen("profile")
 }
 

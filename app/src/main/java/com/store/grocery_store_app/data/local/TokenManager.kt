@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.store.grocery_store_app.utils.Constants
@@ -21,14 +22,15 @@ class TokenManager  @Inject constructor(@ApplicationContext private val context:
     private val userEmailKey = stringPreferencesKey(Constants.USER_EMAIL_KEY)
     private val userNameKey = stringPreferencesKey(Constants.USER_NAME_KEY)
     private val userImageKey = stringPreferencesKey(Constants.USER_IMAGE_KEY)
-
+    private val userIdKey = longPreferencesKey(Constants.USER_ID_KEY)
     // Lưu thông tin đăng nhập
     suspend fun saveUserInfo(
         accessToken: String,
         refreshToken: String,
         email: String,
         fullName: String,
-        imageUrl: String?
+        imageUrl: String?,
+        userId: Long
     ) {
         context.dataStore.edit { preferences ->
             preferences[accessTokenKey] = accessToken
@@ -36,6 +38,7 @@ class TokenManager  @Inject constructor(@ApplicationContext private val context:
             preferences[userEmailKey] = email
             preferences[userNameKey] = fullName
             preferences[userImageKey] = imageUrl ?: ""
+            preferences[userIdKey] = userId
         }
     }
 
@@ -74,6 +77,10 @@ class TokenManager  @Inject constructor(@ApplicationContext private val context:
     val userImage: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
             preferences[userImageKey]
+        }
+    val userId: Flow<Long?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[userIdKey]
         }
 
     // Xóa tất cả thông tin đăng nhập (đăng xuất)

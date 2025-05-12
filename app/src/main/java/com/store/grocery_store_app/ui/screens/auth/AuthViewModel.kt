@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.store.grocery_store_app.data.local.TokenManager
 import com.store.grocery_store_app.data.repository.AuthRepository
+import com.store.grocery_store_app.data.repository.impl.SharedUserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,7 +24,8 @@ data class AuthState(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val sharedUserRepository: SharedUserRepository // Add this
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow(AuthState())
@@ -30,6 +33,13 @@ class AuthViewModel @Inject constructor(
 
     init {
         checkLoginStatus()
+        // Listen for user updates
+        viewModelScope.launch {
+            sharedUserRepository.userUpdatedFlow.collect {
+                // Refresh user info from TokenManager
+                refreshUserInfoFromTokenManager()
+            }
+        }
     }
 
     private fun checkLoginStatus() {
@@ -52,6 +62,16 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             authRepository.logout()
             _authState.value = AuthState(isLoggedIn = false)
+        }
+    }
+
+    private suspend fun refreshUserInfoFromTokenManager() {
+        _authState.update { currentState ->
+            currentState.copy(
+                userEmail = tokenManager.userEmail.first(),
+                userName = tokenManager.userName.first(),
+                userImage = tokenManager.userImage.first()
+            )
         }
     }
 }

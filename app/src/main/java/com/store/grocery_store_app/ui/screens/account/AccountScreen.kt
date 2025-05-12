@@ -39,6 +39,7 @@ fun AccountScreen(
     onNavigateToCategory: () -> Unit = {},
     onNavigateToNotification: () -> Unit = {},
     onNavigateToOrder: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {},
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by authViewModel.authState.collectAsState()
@@ -153,7 +154,7 @@ fun AccountScreen(
                     icon = Icons.Default.Edit,
                     title = "Chỉnh sửa hồ sơ",
                     subtitle = "Cập nhật thông tin cá nhân",
-                    onClick = { /* TODO: Navigate to Edit Profile */ }
+                    onClick = { onNavigateToProfile() }
                 ),
                 AccountMenuItem(
                     icon = Icons.Default.Settings,

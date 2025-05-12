@@ -31,7 +31,8 @@ class AuthRepositoryImpl @Inject constructor(private val apiService: ApiService,
                                 apiResponse.data.refreshToken,
                                 apiResponse.data.email,
                                 apiResponse.data.fullName,
-                                apiResponse.data.imageUrl
+                                apiResponse.data.imageUrl,
+                                apiResponse.data.userId
                             )
                             emit(Resource.Success(apiResponse.data))
                         } else {
