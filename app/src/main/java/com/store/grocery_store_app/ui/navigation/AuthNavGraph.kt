@@ -15,6 +15,7 @@ import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
 import com.store.grocery_store_app.ui.screens.ProductsByCategory.ProductsByCategoryScreen
+import com.store.grocery_store_app.ui.screens.account.AccountScreen
 import com.store.grocery_store_app.ui.screens.category.CategoryScreen
 import com.store.grocery_store_app.ui.screens.cart.CartScreen
 import com.store.grocery_store_app.ui.screens.home.HomeScreen
@@ -168,7 +169,7 @@ fun AuthNavGraph(
                     // Xử lý điều hướng đến thông báo nếu có
                 },
                 onNavigateToAccount = {
-                    // Xử lý điều hướng đến tài khoản nếu có
+                    navController.navigate(Screen.Account.route)
                 },
                 onNavigateToCart = {
                     navController.navigate(Screen.Cart.route) {
@@ -333,5 +334,27 @@ fun AuthNavGraph(
             )
 
         }
+
+        // Account Screen
+        composable(route = Screen.Account.route) {
+            AccountScreen(
+                onNavigateToHome = {
+                    if (navController.currentDestination?.route != Screen.Home.route) {
+                        navController.popBackStack(Screen.Home.route, inclusive = false)
+                    }
+                },
+                onNavigateToCategory = {
+                    navController.navigate(Screen.Category.route)
+                },
+                onNavigateToNotification = {
+                    // TODO: Navigate to notification screen
+                },
+                onNavigateToOrder = {
+                    navController.navigate(Screen.Order.route)
+                }
+            )
+        }
     }
+
+
 }
