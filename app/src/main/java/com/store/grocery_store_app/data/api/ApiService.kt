@@ -18,6 +18,7 @@ import com.store.grocery_store_app.data.models.response.PagedResponse
 import com.store.grocery_store_app.data.models.response.ProductResponse
 import com.store.grocery_store_app.data.models.response.ReviewResponse
 import com.store.grocery_store_app.data.models.response.ReviewStatsResponse
+import com.store.grocery_store_app.data.models.response.VoucherResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -128,4 +129,7 @@ interface ApiService {
 
     @GET("carts")
     suspend fun getAllCartItem() : Response<ApiResponse<CartResponse>>
+
+    @GET("vouchers")
+    suspend fun getAllVoucher() : Response<ApiResponse<List<VoucherResponse>>>
 }

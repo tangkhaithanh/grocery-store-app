@@ -1,10 +1,20 @@
+
 package com.store.grocery_store_app.ui.navigation
 
+import com.google.gson.Gson
+import com.store.grocery_store_app.ui.screens.checkout.Product
 import com.store.grocery_store_app.utils.AuthPurpose
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+/**
+ * Unified Screen sealed class after resolving merge conflicts.
+ * Contains all app destinations with helper createRoute functions.
+ */
 sealed class Screen(val route: String) {
+
+    /* -------------------- Auth flow -------------------- */
+
     object Login : Screen("login")
 
     object EmailVerification : Screen("email_verification/{purpose}") {
@@ -32,13 +42,14 @@ sealed class Screen(val route: String) {
         }
     }
 
-    object Home : Screen("home")
+    /* -------------------- Main tabs -------------------- */
 
-    object Order : Screen("order")
+    object Home    : Screen("home")
+    object Order   : Screen("order")
+    object Splash  : Screen("splash")
+    object Intro   : Screen("intro")
 
-    object Splash : Screen("splash")
-
-    object Intro : Screen("intro")
+    /* -------------------- Product & category -------------------- */
 
     object ProductDetails : Screen("product_details/{productId}") {
         fun createRoute(productId: Long): String = "product_details/$productId"
@@ -47,16 +58,51 @@ sealed class Screen(val route: String) {
     object Review : Screen("review/{orderId}/{orderItemId}") {
         fun createRoute(orderId: Long, orderItemId: Long): String = "review/$orderId/$orderItemId"
     }
-	
-	object Search: Screen("search")
 
-    object Cart: Screen("cart")
-
+    object Search  : Screen("search")
+    object Cart    : Screen("cart")
     object Category: Screen("category")
 
     object ProductsByCategory : Screen("products_by_category/{categoryId}") {
         fun createRoute(categoryId: Long): String = "products_by_category/$categoryId"
     }
 
+    /* -------------------- Check-out flow -------------------- */
+
+    object CheckOut : Screen("checkout/{selectedProductsJson}") {
+
+        /**
+         * Pass a JSON string (already encoded/escaped if necessary).
+         */
+        fun createRoute(selectedProductsJson: String): String {
+            val encoded = URLEncoder.encode(selectedProductsJson, StandardCharsets.UTF_8.toString())
+            return "checkout/$encoded"
+        }
+
+        /**
+         * Convenience helper to build the route directly from a product list.
+         * Gson is used to convert to JSON before encoding.
+         */
+        fun createRoute(products: List<Product>): String {
+            val json = Gson().toJson(products)
+            return createRoute(json)
+        }
+    }
+
+    /* -------------------- Address flow -------------------- */
+
+    object Address : Screen("address")
+
+    object EditAddress : Screen("edit_address/{addressId}") {
+        fun createRoute(addressId: Long): String = "edit_address/$addressId"
+    }
+
+    /* -------------------- Voucher -------------------- */
+
+    object Voucher : Screen("voucher")
+
+    /* -------------------- Account -------------------- */
+
     object Account : Screen("account")
 }
+

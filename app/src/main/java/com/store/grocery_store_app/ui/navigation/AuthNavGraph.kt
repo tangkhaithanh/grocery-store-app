@@ -1,31 +1,46 @@
+import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.internal.composableLambda
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.store.grocery_store_app.ui.screens.EmailVerification.EmailVerificationScreen
-import com.store.grocery_store_app.ui.screens.login.LoginScreen
-import com.store.grocery_store_app.ui.screens.otp.OtpVerificationScreen
-import com.store.grocery_store_app.ui.screens.register.RegisterScreen
-import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
-import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
+import com.google.android.gms.maps.model.LatLng
+import com.google.gson.Gson
 import com.store.grocery_store_app.ui.navigation.Screen
+import com.store.grocery_store_app.ui.screens.EmailVerification.EmailVerificationScreen
+import com.store.grocery_store_app.ui.screens.account.AccountScreen
+import com.store.grocery_store_app.ui.screens.address.Address
+import com.store.grocery_store_app.ui.screens.address.AddressListScreen
+import com.store.grocery_store_app.ui.screens.address.EditAddressScreen
+import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
+import com.store.grocery_store_app.ui.screens.cart.CartScreen
+import com.store.grocery_store_app.ui.screens.category.CategoryScreen
+import com.store.grocery_store_app.ui.screens.checkout.CheckoutScreen
+import com.store.grocery_store_app.ui.screens.checkout.Product
+import com.store.grocery_store_app.ui.screens.home.HomeScreen
+import com.store.grocery_store_app.ui.screens.intro.IntroScreen
+import com.store.grocery_store_app.ui.screens.login.LoginScreen
+import com.store.grocery_store_app.ui.screens.order.OrderScreen
+import com.store.grocery_store_app.ui.screens.otp.OtpVerificationScreen
 import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
 import com.store.grocery_store_app.ui.screens.ProductsByCategory.ProductsByCategoryScreen
-import com.store.grocery_store_app.ui.screens.account.AccountScreen
-import com.store.grocery_store_app.ui.screens.category.CategoryScreen
-import com.store.grocery_store_app.ui.screens.cart.CartScreen
-import com.store.grocery_store_app.ui.screens.home.HomeScreen
-import com.store.grocery_store_app.ui.screens.search.SearchScreen
-import com.store.grocery_store_app.ui.screens.intro.IntroScreen
-import com.store.grocery_store_app.ui.screens.order.OrderScreen
+import com.store.grocery_store_app.ui.screens.register.RegisterScreen
+import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
 import com.store.grocery_store_app.ui.screens.reviews.ReviewProductScreen
+import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.splash.SplashScreen
+import com.store.grocery_store_app.ui.screens.voucher.VoucherScreen
 import com.store.grocery_store_app.utils.AuthPurpose
 
+/**
+ * AuthNavGraph kết hợp logic của cả hai nhánh mà không còn conflict.
+ * Các màn hình mới (Account, Address, CheckOut, Voucher, v.v.) đã được hợp nhất.
+ */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AuthNavGraph(
     navController: NavHostController,
@@ -37,8 +52,10 @@ fun AuthNavGraph(
         navController = navController,
         startDestination = startDestination
     ) {
+        /* -------------------- Auth & On‑boarding -------------------- */
+
         // Login Screen
-        composable(route = Screen.Login.route) {
+        composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = {
                     navController.navigate(Screen.EmailVerification.createRoute(AuthPurpose.REGISTRATION))
@@ -68,9 +85,7 @@ fun AuthNavGraph(
                 onNavigateToOtp = { email ->
                     navController.navigate(Screen.OtpVerification.createRoute(purpose, email))
                 },
-                onBack = {
-                    navController.popBackStack()
-                }
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -92,18 +107,11 @@ fun AuthNavGraph(
                 email = email,
                 onVerificationSuccess = {
                     when (purpose) {
-                        AuthPurpose.REGISTRATION -> {
-                            navController.navigate(Screen.Register.createRoute(email))
-                        }
-
-                        AuthPurpose.PASSWORD_RESET -> {
-                            navController.navigate(Screen.ResetPassword.createRoute(email))
-                        }
+                        AuthPurpose.REGISTRATION   -> navController.navigate(Screen.Register.createRoute(email))
+                        AuthPurpose.PASSWORD_RESET -> navController.navigate(Screen.ResetPassword.createRoute(email))
                     }
                 },
-                onBack = {
-                    navController.popBackStack()
-                }
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -120,9 +128,7 @@ fun AuthNavGraph(
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
-                onBack = {
-                    navController.popBackStack()
-                }
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -139,65 +145,12 @@ fun AuthNavGraph(
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        // Home Screen
-        composable(route = Screen.Home.route) {
-            HomeScreen(
-                onLogout = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
-                    }
-                },
-                onNavigateToProductDetails = { productId ->
-                    navController.navigate(Screen.ProductDetails.createRoute(productId))
-                },
-                onNavigateToOrder = {
-                    navController.navigate(Screen.Order.route)
-                },
-                onNavigateToSearch = {
-                    navController.navigate(Screen.Search.route)
-                },
-                onNavigateToCategory = {
-                    navController.navigate(Screen.Category.route)
-                },
-                onNavigateToNotification = {
-                    // Xử lý điều hướng đến thông báo nếu có
-                },
-                onNavigateToAccount = {
-                    navController.navigate(Screen.Account.route)
-                },
-                onNavigateToCart = {
-                    navController.navigate(Screen.Cart.route) {
-                        popUpTo(Screen.Cart.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        // Order Screen
-        composable(route = Screen.Order.route) {
-            OrderScreen(
-                onHome = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
-                    }
-                },
-                onNavigateToReviewProduct = { orderId, orderItemId ->
-                    navController.navigate(Screen.Review.createRoute(orderId, orderItemId))
-                },
-                onNavigateToProductDetails = { productId ->
-                    navController.navigate(Screen.ProductDetails.createRoute(productId))
-                }
+                onBack = { navController.popBackStack() }
             )
         }
 
         // Splash Screen
-        composable(route = Screen.Splash.route) {
+        composable(Screen.Splash.route) {
             SplashScreen(
                 onIntro = {
                     navController.navigate(Screen.Intro.route) {
@@ -208,7 +161,7 @@ fun AuthNavGraph(
         }
 
         // Intro Screen
-        composable(route = Screen.Intro.route) {
+        composable(Screen.Intro.route) {
             IntroScreen(
                 authViewModel,
                 onAutoLogin = {
@@ -224,6 +177,66 @@ fun AuthNavGraph(
             )
         }
 
+        /* -------------------- Main Screens -------------------- */
+
+        // Home Screen
+        composable(Screen.Home.route) {
+            HomeScreen(
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                },
+                onNavigateToProductDetails = { productId ->
+                    navController.navigate(Screen.ProductDetails.createRoute(productId))
+                },
+                onNavigateToOrder = { navController.navigate(Screen.Order.route) },
+                onNavigateToSearch = { navController.navigate(Screen.Search.route) },
+                onNavigateToCategory = { navController.navigate(Screen.Category.route) },
+                onNavigateToNotification = { /* TODO */ },
+                onNavigateToAccount = { navController.navigate(Screen.Account.route) },
+                onNavigateToCart = {
+                    navController.navigate(Screen.Cart.route) {
+                        popUpTo(Screen.Cart.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Category Screen
+        composable(Screen.Category.route) {
+            CategoryScreen(
+                onNavigateToProductsByCategory = { categoryId ->
+                    navController.navigate(Screen.ProductsByCategory.createRoute(categoryId))
+                },
+                onNavigateToOrder = { navController.navigate(Screen.Order.route) },
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
+                },
+                onNavigateToNotification = { /* TODO */ },
+                onNavigateToAccount = { /* TODO */ }
+            )
+        }
+
+        // Products by Category Screen
+        composable(
+            route = Screen.ProductsByCategory.route,
+            arguments = listOf(navArgument("categoryId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: 0L
+
+            ProductsByCategoryScreen(
+                categoryId = categoryId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProductDetails = { productId ->
+                    navController.navigate(Screen.ProductDetails.createRoute(productId))
+                }
+            )
+        }
+
         // Product Details Screen
         composable(
             route = Screen.ProductDetails.route,
@@ -233,90 +246,43 @@ fun AuthNavGraph(
 
             ProductDetailsScreen(
                 productId = productId,
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onAddToCartSuccess = {
-                    navController.popBackStack()
-                },
+                onNavigateBack = { navController.popBackStack() },
+                onAddToCartSuccess = { navController.popBackStack() },
                 onNavigateToProduct = { newProductId ->
                     navController.navigate(Screen.ProductDetails.createRoute(newProductId)) {
                         popUpTo(navController.currentBackStackEntry?.destination?.route ?: "") {
                             inclusive = true
                         }
                     }
+                },
+                onNavigateToCart = {
+                    navController.navigate(Screen.Cart.route) {
+                        popUpTo(Screen.Cart.route) { inclusive = true }
+                    }
                 }
             )
         }
-		
-		// Unified Search Screen
-        composable(route = Screen.Search.route) {
+
+        // Unified Search Screen
+        composable(Screen.Search.route) {
             SearchScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
+                onNavigateBack = { navController.popBackStack() },
                 onProductClick = { productId ->
                     navController.navigate(Screen.ProductDetails.createRoute(productId))
                 }
             )
         }
-		// review Product Screen
-		composable(
-            route = Screen.Review.route,
-            arguments = listOf(
-                navArgument("orderId") { type = NavType.LongType },
-                navArgument("orderItemId") { type = NavType.LongType }
-            )
-        ) {
-            backStackEntry ->
-            val orderId = backStackEntry.arguments?.getLong("orderId") ?: 0L
-            val orderItemId = backStackEntry.arguments?.getLong("orderItemId") ?: 0L
-            ReviewProductScreen(
-                orderId = orderId,
-                orderItemId = orderItemId,
-                onNavigateToOrder = {
-                    navController.popBackStack()
-                }
-            )
 
-        }
-        composable(route = Screen.Category.route) {
-            CategoryScreen(
-                onNavigateToProductsByCategory = { categoryId ->
-                    navController.navigate(Screen.ProductsByCategory.createRoute(categoryId))
-                },
-                onNavigateToOrder = {
-                    navController.navigate(Screen.Order.route)
-                },
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToHome = {
+        // Order Screen
+        composable(Screen.Order.route) {
+            OrderScreen(
+                onHome = {
                     navController.navigate(Screen.Home.route) {
-                        // Làm sạch stack khi chuyển tab
-                        popUpTo(Screen.Home.route) { inclusive = false }
+                        popUpTo(Screen.Home.route) { inclusive = true }
                     }
                 },
-                onNavigateToNotification = {
-                    // Điều hướng đến màn hình thông báo (nếu có)
-                    // Nếu chưa có, bạn có thể hiển thị Snackbar thông báo
-                },
-                onNavigateToAccount = {
-                    // Điều hướng đến màn hình tài khoản (nếu có)
-                }
-            )
-        }
-
-        composable(
-            route = Screen.ProductsByCategory.route,
-            arguments = listOf(navArgument("categoryId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val categoryId = backStackEntry.arguments?.getLong("categoryId") ?: 0L
-
-            ProductsByCategoryScreen(
-                categoryId = categoryId,
-                onNavigateBack = {
-                    navController.popBackStack()
+                onNavigateToReviewProduct = { orderId, orderItemId ->
+                    navController.navigate(Screen.Review.createRoute(orderId, orderItemId))
                 },
                 onNavigateToProductDetails = { productId ->
                     navController.navigate(Screen.ProductDetails.createRoute(productId))
@@ -324,37 +290,151 @@ fun AuthNavGraph(
             )
         }
 
-        composable(route = Screen.Cart.route) {
+        // Review Product Screen
+        composable(
+            route = Screen.Review.route,
+            arguments = listOf(
+                navArgument("orderId") { type = NavType.LongType },
+                navArgument("orderItemId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val orderId     = backStackEntry.arguments?.getLong("orderId")     ?: 0L
+            val orderItemId = backStackEntry.arguments?.getLong("orderItemId") ?: 0L
+
+            ReviewProductScreen(
+                orderId = orderId,
+                orderItemId = orderItemId,
+                onNavigateToOrder = { navController.popBackStack() }
+            )
+        }
+
+        /* -------------------- Cart & Check‑out flow -------------------- */
+
+        // Cart Screen
+        composable(Screen.Cart.route) {
             CartScreen(
                 onHome = {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
+                },
+                onPayment = { selectedProducts ->
+                    val json = Uri.encode(Gson().toJson(selectedProducts))
+                    navController.navigate(Screen.CheckOut.createRoute(json))
+                },
+                onNavigateVoucher = {
+                    navController.navigate(Screen.Voucher.route) {
+                        popUpTo(Screen.Voucher.route) { inclusive = true }
+                    }
                 }
             )
-
         }
 
-        // Account Screen
-        composable(route = Screen.Account.route) {
+        // CheckOut Screen
+        composable(
+            route = Screen.CheckOut.route,
+            arguments = listOf(navArgument("selectedProductsJson") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val selectedProductsJson = backStackEntry.arguments?.getString("selectedProductsJson") ?: "[]"
+            val selectedProducts     = Gson().fromJson(selectedProductsJson, Array<Product>::class.java).toList()
+
+            CheckoutScreen(
+                products = selectedProducts,
+                voucher = null,
+                onBackClick = { navController.popBackStack() },
+                onNavigateAddress = {
+                    navController.navigate(Screen.Address.route) {
+                        popUpTo(Screen.Address.route) { inclusive = true }
+                    }
+                },
+                onNavigateVoucher = {
+                    navController.navigate(Screen.Voucher.route) {
+                        popUpTo(Screen.Voucher.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        /* -------------------- Address flow -------------------- */
+
+        // Address List
+        composable(Screen.Address.route) {
+            val sampleAddresses = listOf(
+                Address(
+                    id = "1",
+                    recipient = "Nguyễn Văn A",
+                    phone = "0901234567",
+                    street = "123 Lý Thường Kiệt",
+                    building = "Tòa nhà ABC",
+                    province = "TP.HCM",
+                    district = "Quận 10",
+                    ward = "Phường 5",
+                    latLng = null
+                ),
+                Address(
+                    id = "2",
+                    recipient = "Trần Thị B",
+                    phone = "0912345678",
+                    street = "456 Hai Bà Trưng",
+                    building = "Chung cư XYZ",
+                    province = "Hà Nội",
+                    district = "Quận Hoàn Kiếm",
+                    ward = "Phường Hàng Bạc",
+                    latLng = null
+                )
+            )
+
+            AddressListScreen(
+                addresses = sampleAddresses,
+                selectedId = "1",
+                onSelect = { /* TODO */ },
+                onEdit = { addressId ->
+                    navController.navigate(Screen.EditAddress.createRoute(addressId))
+                }
+            )
+        }
+
+        // Edit Address
+        composable(
+            route = Screen.EditAddress.route,
+            arguments = listOf(navArgument("addressId") { type = NavType.LongType })
+        ) {
+            val sample = Address(
+                id = "1",
+                recipient = "Nguyễn Văn A",
+                phone = "0901234567",
+                street = "123 Lý Thường Kiệt",
+                building = "Tòa nhà ABC",
+                province = "TP.HCM",
+                district = "Quận 10",
+                ward = "Phường 5",
+                latLng = LatLng(10.762622, 106.660172)
+            )
+
+            EditAddressScreen(
+                address = sample,
+                onSave = { /* TODO */ }
+            )
+        }
+
+        /* -------------------- Voucher -------------------- */
+        composable(Screen.Voucher.route) {
+            VoucherScreen(onConfirm = { /* TODO */ })
+        }
+
+        /* -------------------- Account -------------------- */
+        composable(Screen.Account.route) {
             AccountScreen(
                 onNavigateToHome = {
                     if (navController.currentDestination?.route != Screen.Home.route) {
                         navController.popBackStack(Screen.Home.route, inclusive = false)
                     }
                 },
-                onNavigateToCategory = {
-                    navController.navigate(Screen.Category.route)
-                },
-                onNavigateToNotification = {
-                    // TODO: Navigate to notification screen
-                },
-                onNavigateToOrder = {
-                    navController.navigate(Screen.Order.route)
-                }
+                onNavigateToCategory = { navController.navigate(Screen.Category.route) },
+                onNavigateToNotification = { /* TODO */ },
+                onNavigateToOrder = { navController.navigate(Screen.Order.route) }
             )
         }
     }
-
-
 }
+

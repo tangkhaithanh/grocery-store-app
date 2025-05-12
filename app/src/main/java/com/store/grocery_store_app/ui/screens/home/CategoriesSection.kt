@@ -298,7 +298,9 @@ fun CategoryErrorView(error: String, onRetry: () -> Unit) {
 }
 
 @Composable
-fun EmptyCategoryView() {
+fun EmptyCategoryView(
+    content : String = "Không tìm thấy danh mục nào",
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -306,7 +308,7 @@ fun EmptyCategoryView() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Không tìm thấy danh mục nào",
+            text = content,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )

@@ -45,10 +45,13 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.store.grocery_store_app.R
 import com.store.grocery_store_app.data.models.request.CartItemRequest
+import com.store.grocery_store_app.data.models.response.CartItemResponse
 
 @Composable
 fun CartItemCard(
-    cartItem : CartItemRequest
+    cartItem : CartItemResponse,
+    checked : Boolean = false,
+    onCheckedChange : (Boolean) -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -82,8 +85,10 @@ fun CartItemCard(
 
             SwipeableCartItemRow(
                 cartItem = cartItem,
+                checked = checked,
                 onDelete = {},
-                onShowSimilar = {}
+                onShowSimilar = {},
+                onCheckedChange = onCheckedChange
             )
         }
     }
