@@ -5,6 +5,7 @@ plugins {
     id("kotlin-kapt")
     // Bỏ KSP vì chúng ta sẽ dùng KAPT cho tất cả
     alias(libs.plugins.hilt) // Sửa thành alias để khớp với version catalog
+    id("kotlin-parcelize")
 }
 
 android {

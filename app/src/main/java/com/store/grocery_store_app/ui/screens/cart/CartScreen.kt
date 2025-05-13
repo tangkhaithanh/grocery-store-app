@@ -7,14 +7,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.ConfirmationNumber
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -34,24 +32,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.store.grocery_store_app.R
+import com.store.grocery_store_app.ui.components.ErrorDialog
+import com.store.grocery_store_app.ui.components.LoadingDialog
+import com.store.grocery_store_app.ui.components.SuccessDialog
 import com.store.grocery_store_app.ui.screens.cart.components.CartItemCard
-import com.store.grocery_store_app.ui.screens.cart.components.CartItemRow
 import com.store.grocery_store_app.ui.screens.checkout.Product
 import java.math.RoundingMode
 import java.text.NumberFormat
@@ -72,6 +61,11 @@ fun CartScreen(
     val cartItems = state.cartItems
     val isCartChecked = cartViewModel.isCartChecked.value
     val itemCheckedMap = cartViewModel.itemCheckedMap
+
+    val totalPrice = cartItems
+        .filter { itemCheckedMap[it.id ?: -1L] == true }
+        .sumOf { it.price.toInt() * it.quantity }
+
     LaunchedEffect(Unit) {
         cartViewModel.getAllCartItem()
     }
@@ -153,7 +147,7 @@ fun CartScreen(
                             }
                         ) {
                             Text(
-                                text = "Chọn hoặc nhập mã",
+                                text = "Xem mã đang có",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -206,10 +200,10 @@ fun CartScreen(
                                 Text(
                                     text = "Tổng cộng",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
-                                    text = "0đ",
+                                    text = currencyFormatter.format(totalPrice),
                                     style = MaterialTheme.typography.titleSmall,
                                     color = MaterialTheme.colorScheme.error
                                 )
@@ -233,7 +227,13 @@ fun CartScreen(
                                                 quantity = it.quantity
                                             )
                                         }
-                                    onPayment(selectedProducts) // Gọi hàm điều hướng đã truyền vào
+
+                                    if(selectedProducts.isEmpty()) {
+                                        cartViewModel.showError("Vui lòng chọn sản phẩm trước khi thanh toán")
+                                    }
+                                    else {
+                                        onPayment(selectedProducts) // Gọi hàm điều hướng đã truyền vào
+                                    }
                                 },
                                 modifier = Modifier
                                     .wrapContentHeight()
@@ -250,6 +250,25 @@ fun CartScreen(
             }
         }
     ) { innerPadding ->
+        LoadingDialog(
+            isLoading = state.isLoading,
+            message = "Đang tải dữ liệu",
+        )
+        if(state.error!=null) {
+            ErrorDialog(
+                title = "Lỗi",
+                content = state.error!!,
+                clearError = cartViewModel::clearError
+            )
+        }
+        if(state.isRemove) {
+            SuccessDialog(
+                title = "Xóa sản phẩm ra khỏi giỏ hàng",
+                content = "Bạn đã thành công xóa sản phẩm ra khỏi giỏ hàng",
+                clearError = cartViewModel::clearError,
+                confirmButtonRequest =cartViewModel::onHideSuccess
+            )
+        }
         LazyColumn (
             modifier = Modifier
                 .padding(innerPadding)
@@ -267,6 +286,26 @@ fun CartScreen(
                         checked = checked,
                         onCheckedChange = { isChecked ->
                             cartViewModel.updateItemChecked(item.id, isChecked)
+                        },
+                        onQuantityIncrease = {
+                            val currentQuantity = item.quantity ?: 0
+                            val newQuantity = currentQuantity + 1
+                            // Chỉ gọi nếu itemId hợp lệ
+                            if (item.id != -1L) {
+                                item.id?.let { cartViewModel.updateCartItemQuantity(it, newQuantity, item.product.id) }
+                            }
+                        },
+                        onQuantityDecrease = {
+                            val currentQuantity = item.quantity ?: 0
+                            if (currentQuantity > 1) { // Giới hạn số lượng tối thiểu
+                                val newQuantity = currentQuantity - 1
+                                if (item.id != -1L) {
+                                    item.id?.let { cartViewModel.updateCartItemQuantity(it, newQuantity, item.product.id) }
+                                }
+                            }
+                        },
+                        onRemove = {
+                            if(item.id != null) cartViewModel.removeCartItem(item.id)
                         }
                     )
                     Spacer(modifier = Modifier.height(5.dp))

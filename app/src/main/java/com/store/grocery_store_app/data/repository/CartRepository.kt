@@ -11,4 +11,8 @@ interface CartRepository {
     suspend fun insertProductIntoCart(cartItemRequest: CartItemRequest): Flow<Resource<Any>>
 
     suspend fun getAllCartItem(): Flow<Resource<CartResponse>>
+
+    suspend fun removeCartItem(id:Long) : Flow<Resource<Any>>
+    suspend fun updateProductIntoCart(cartItemRequest: CartItemRequest): Flow<Resource<Any>>
+
 }

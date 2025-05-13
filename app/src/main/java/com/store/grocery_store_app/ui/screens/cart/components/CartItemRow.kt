@@ -1,5 +1,7 @@
 package com.store.grocery_store_app.ui.screens.cart.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -11,8 +13,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -24,12 +24,45 @@ import com.store.grocery_store_app.data.models.request.CartItemRequest
 import com.store.grocery_store_app.data.models.response.CartItemResponse
 import java.text.NumberFormat
 import java.util.Locale
-
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import com.store.grocery_store_app.ui.components.ErrorDialog
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 @Composable
 fun CartItemRow(
     cartItem: CartItemResponse,
     checked: Boolean = false,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    onQuantityIncrease: () -> Unit,
+    onQuantityDecrease: () -> Unit,
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -80,9 +113,15 @@ fun CartItemRow(
                         )
                     }
                 }
-                QuantityPicker(quantity = quantity, quantityMax = cartItem.product.quantity-cartItem.product.soldCount, onQuantityChange = {
+                QuantityPicker(
+                    quantity = quantity,
+                    quantityMax = cartItem.product.quantity-cartItem.product.soldCount,
+                    onQuantityChange = {
                     quantity = it
-                })
+                },
+                    onQuantityIncrease = onQuantityIncrease,
+                    onQuantityDecrease = onQuantityDecrease,
+                )
             }
         }
     }
@@ -93,8 +132,18 @@ fun QuantityPicker(
     quantity: Int,
     quantityMax: Int,
     size: Dp = 24.dp,
-    onQuantityChange: (Int) -> Unit
+    onQuantityChange: (Int) -> Unit,
+    onQuantityIncrease: () -> Unit,
+    onQuantityDecrease: () -> Unit,
 ) {
+    if(quantity == 0) ErrorDialog(
+        title = "Lỗi",
+        content = "Không được chọn số lượng sản phẩm dưới 1",
+    )
+    else if(quantity>quantityMax) ErrorDialog(
+        title = "Lỗi",
+        content = "Không được chọn số lượng sản phẩm vượt quá số lượng sản phẩm trong kho",
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -103,7 +152,9 @@ fun QuantityPicker(
             .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
     ) {
         IconButton(
-            onClick = { onQuantityChange((quantity - 1).coerceAtLeast(1)) },
+            onClick = {
+                onQuantityChange((quantity - 1).coerceAtLeast(1))
+                      onQuantityDecrease()},
             enabled = quantity > 1,
             modifier = Modifier.size(size)
         ) {
@@ -115,7 +166,10 @@ fun QuantityPicker(
         }
         Divider(Modifier.width(1.dp).fillMaxHeight())
         IconButton(
-            onClick = { onQuantityChange((quantity + 1).coerceAtMost(quantityMax)) },
+            onClick = {
+                onQuantityChange((quantity + 1).coerceAtMost(quantityMax))
+                onQuantityIncrease()
+                      },
             enabled = quantity < quantityMax,
             modifier = Modifier.size(size)
         ) {
@@ -124,78 +178,148 @@ fun QuantityPicker(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeableCartItemRow(
     cartItem: CartItemResponse,
     checked: Boolean = false,
-    onDelete: () -> Unit,
+    onDelete: (Long) -> Unit,
     onShowSimilar: () -> Unit,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    onQuantityIncrease: () -> Unit,
+    onQuantityDecrease: () -> Unit,
 ) {
-    val state = rememberSwipeToDismissBoxState()
-    val dismissed = state.dismissDirection
-    val isRevealed = dismissed != SwipeToDismissBoxValue.Settled
-
-    val colorSimilar by animateColorAsState(
-        targetValue = if (isRevealed && dismissed == SwipeToDismissBoxValue.EndToStart) Color(0xFFFF9800) else Color.Transparent,
-        animationSpec = tween(300)
-    )
-    val colorDelete by animateColorAsState(
-        targetValue = if (isRevealed && dismissed == SwipeToDismissBoxValue.StartToEnd) Color(0xFFF44336) else Color.Transparent,
-        animationSpec = tween(300)
-    )
-
-    SwipeToDismissBox(
-        state = state,
-        backgroundContent = {
-            if (isRevealed) {
-                Row(
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        Modifier
-                            .fillMaxHeight()
-                            .width(100.dp)
-                            .background(colorSimilar),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        TextButton(onClick = onShowSimilar) {
-                            Text("Sản phẩm tương tự", textAlign = TextAlign.Center)
+    var actionWidth by remember { mutableStateOf(0f) }
+    val offsetX = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+    var isExpanded by remember { mutableStateOf(false) }
+    // Pre-calc gap in px
+    val gapPx = with(LocalDensity.current) { 12.dp.toPx() }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    // Confirmation dialog for delete
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Xác nhận xóa") },
+            text = { Text("Bạn có chắc muốn xóa sản phẩm này ra khỏi giỏ hàng?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    cartItem.id?.let { onDelete(it) }
+                    showConfirmDialog = false
+                }) {
+                    Text("Xác nhận")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text("Hủy")
+                }
+            }
+        )
+    }
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .pointerInput(isExpanded, actionWidth) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { _, dragAmount ->
+                        scope.launch {
+                            val raw = offsetX.value + dragAmount
+                            val coerced = raw.coerceIn(-actionWidth, 0f)
+                            offsetX.snapTo(coerced)
+                        }
+                    },
+                    onDragEnd = {
+                        scope.launch {
+                            if (!isExpanded) {
+                                if (offsetX.value <= -actionWidth / 2) {
+                                    offsetX.animateTo(-actionWidth, tween(300))
+                                    isExpanded = true
+                                } else {
+                                    offsetX.animateTo(0f, tween(300))
+                                }
+                            } else {
+                                if (offsetX.value >= -actionWidth / 2) {
+                                    offsetX.animateTo(0f, tween(300))
+                                    isExpanded = false
+                                } else {
+                                    offsetX.animateTo(-actionWidth, tween(300))
+                                }
+                            }
                         }
                     }
-                    Box(
-                        Modifier
-                            .fillMaxHeight()
-                            .width(80.dp)
-                            .background(colorDelete),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        TextButton(onClick = onDelete) {
-                            Text("Xóa")
-                        }
+                )
+            }
+    ) {
+        // Actions container: slide together with content drag
+        Box(
+            Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Row(
+                Modifier
+                    .wrapContentWidth()
+                    .onSizeChanged { actionWidth = it.width.toFloat() }
+                    .offset {
+                        // offset so action row enters with a gap
+                        IntOffset((offsetX.value + actionWidth + gapPx).roundToInt(), 0)
+                    },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxHeight()
+                        .width(80.dp)
+                        .background(Color(0xFFFF9800)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    TextButton(onClick = onShowSimilar) {
+                        Text("Sản phẩm tương tự", textAlign = TextAlign.Center,
+                            color = Color.White
+                        )
+                    }
+                }
+                Box(
+                    Modifier
+                        .fillMaxHeight()
+                        .width(60.dp)
+                        .background(MaterialTheme.colorScheme.error)
+                        .clickable {
+                            showConfirmDialog = true;
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextButton(onClick = { showConfirmDialog = true }) {
+                        Text("Xóa",
+                            color = Color.White
+                        )
                     }
                 }
             }
-        },
-        enableDismissFromStartToEnd = true,
-        enableDismissFromEndToStart = true,
-        modifier = Modifier.padding(vertical = 4.dp)
-    ) {
-        CartItemRow(
-            cartItem = cartItem,
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
+        }
+
+        // Foreground content
+        Box(
+            Modifier
+                .fillMaxSize()
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+        ) {
+            CartItemRow(
+                cartItem = cartItem,
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                onQuantityIncrease = onQuantityIncrease,
+                onQuantityDecrease = onQuantityDecrease,
+            )
+        }
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
 fun QuantityPickerPreview() {
-    QuantityPicker(quantity = 1, quantityMax = 10, onQuantityChange = {})
+//    QuantityPicker(quantity = 1, quantityMax = 10, onQuantityChange = {})
 }

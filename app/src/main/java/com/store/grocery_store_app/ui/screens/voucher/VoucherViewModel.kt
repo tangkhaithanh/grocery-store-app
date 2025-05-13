@@ -25,10 +25,13 @@ class VoucherViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(VoucherUiState())
     val uiState: StateFlow<VoucherUiState> = _uiState.asStateFlow()
 
-    private val _selectedVoucherIds = MutableStateFlow<Map<String, Long?>>(
-        mapOf("FREESHIP" to null, "DISCOUNT" to null)
-    )
-    val selectedVoucherIds: StateFlow<Map<String, Long?>> = _selectedVoucherIds.asStateFlow()
+    // Changed to store a single selected voucher ID instead of a map
+    private val _selectedVoucherId = MutableStateFlow<Long?>(null)
+    val selectedVoucherId: StateFlow<Long?> = _selectedVoucherId.asStateFlow()
+
+    // Keep track of selected voucher type for easier access
+    private val _selectedVoucherType = MutableStateFlow<String?>(null)
+    val selectedVoucherType: StateFlow<String?> = _selectedVoucherType.asStateFlow()
 
     init {
         fetchVouchers()
@@ -71,10 +74,38 @@ class VoucherViewModel @Inject constructor(
     }
 
     fun onVoucherChecked(voucher: VoucherResponse) {
-        val current = _selectedVoucherIds.value.toMutableMap()
-        val key = voucher.type ?: return
+        // If this voucher is already selected, unselect it
+        if (_selectedVoucherId.value == voucher.id) {
+            _selectedVoucherId.value = null
+            _selectedVoucherType.value = null
+        } else {
+            // Otherwise, select this new voucher (replacing any previously selected one)
+            _selectedVoucherId.value = voucher.id
+            _selectedVoucherType.value = voucher.type
+        }
+    }
 
-        current[key] = if (current[key] == voucher.id) null else voucher.id
-        _selectedVoucherIds.value = current
+    // Get the currently selected voucher object (not just ID)
+    fun getSelectedVoucher(): VoucherResponse? {
+        val id = _selectedVoucherId.value ?: return null
+
+        return when (_selectedVoucherType.value) {
+            "FREESHIP" -> _uiState.value.vouchersFreeship.find { it.id == id }
+            "DISCOUNT" -> _uiState.value.vouchersDiscount.find { it.id == id }
+            else -> null
+        }
+    }
+
+    // Check if a specific voucher is currently selected
+    fun isVoucherSelected(voucherId: Long): Boolean {
+        return _selectedVoucherId.value == voucherId
+    }
+
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
+    }
+    fun showError(message : String) {
+        _uiState.update { it.copy(error = message) }
     }
 }

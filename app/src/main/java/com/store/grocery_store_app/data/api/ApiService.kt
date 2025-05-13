@@ -130,6 +130,11 @@ interface ApiService {
         @Body cartItemRequest: CartItemRequest
     ) : Response<ApiResponse<Any>>
 
+    @POST("carts/updateToCart")
+    suspend fun updateProductIntoCart(
+        @Body cartItemRequest: CartItemRequest
+    ) : Response<ApiResponse<Any>>
+
     @GET("carts")
     suspend fun getAllCartItem() : Response<ApiResponse<CartResponse>>
 
@@ -143,4 +148,7 @@ interface ApiService {
     @PUT("user/update/{id}")
     suspend fun updateUser(@Path("id") id: Long, @Body request: UpdateUserRequest): Response<ApiResponse<UserDTO>>
 
+
+    @DELETE("carts/items/{cartItemId}")
+    suspend fun removeCartItem(@Path("cartItemId") id:Long) : Response<ApiResponse<Any>>
 }

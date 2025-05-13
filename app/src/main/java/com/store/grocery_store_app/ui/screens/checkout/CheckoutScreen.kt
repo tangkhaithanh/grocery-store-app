@@ -1,6 +1,7 @@
 package com.store.grocery_store_app.ui.screens.checkout
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,11 +16,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.ConfirmationNumber
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -44,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -51,7 +57,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.store.grocery_store_app.data.models.response.VoucherResponse
 import com.store.grocery_store_app.ui.screens.address.Address
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 private val DeepTeal = Color(0xFF004D40)
@@ -61,17 +70,21 @@ private val OffWhite = Color(0xFFF5F5F5)
 @Composable
 fun CheckoutScreen(
     products: List<Product>,
-    voucher: Voucher?,
+    voucher: VoucherResponse?,
     onBackClick: () -> Unit = {},
     onPlaceOrderClick: () -> Unit = {},
     onNavigateAddress: () -> Unit = {},
     onNavigateVoucher: () -> Unit = {}
 ) {
+    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
+        maximumFractionDigits = 0
+    }
     val totalGoods = products.sumOf { it.price * it.quantity }
     val shippingFee = 30000
-    val discountAmount = voucher?.discountAmount ?: 0
+    val discountAmount = voucher?.discount?.toInt() ?: 0
     val shippingDiscount = if (discountAmount > 0) 10000 else 0
-    val totalPayment = totalGoods + shippingFee - shippingDiscount - discountAmount
+    var totalPayment = totalGoods + shippingFee - shippingDiscount - discountAmount
+    if(totalPayment < 0) totalPayment = 0
 
     Scaffold(
         containerColor = OffWhite,
@@ -195,34 +208,11 @@ fun CheckoutScreen(
 
             // 3. Mã giảm giá & Vận chuyển
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    shape = RoundedCornerShape(8.dp),
-                    elevation = CardDefaults.cardElevation(2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        SectionTitle("Mã giảm giá & Vận chuyển")
-                        if (voucher != null) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.ConfirmationNumber,
-                                    contentDescription = "Voucher",
-                                    tint = DeepTeal
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("${voucher.code} - Giảm ${voucher.discountAmount}đ", color = DeepTeal)
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("Phí vận chuyển: ${shippingFee}đ", style = MaterialTheme.typography.bodyMedium, color = DeepTeal)
-                    }
-                }
+                VoucherSection(
+                    hasShippingVoucher = voucher?.type == "FREESHIP",
+                    discountVoucherAmount = voucher?.discount?.toBigInteger()?.toString(),
+                    onVoucherClick = onNavigateVoucher
+                )
             }
 
             // 4. Phương thức thanh toán
@@ -272,14 +262,14 @@ fun CheckoutScreen(
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         SectionTitle("Chi tiết thanh toán")
-                        RowInfo("Tổng tiền hàng", "${totalGoods}đ")
-                        RowInfo("Phí vận chuyển", "${shippingFee}đ")
-                        RowInfo("Giảm phí vận chuyển", "-${shippingDiscount}đ")
-                        RowInfo("Giảm voucher", "-${discountAmount}đ")
+                        RowInfo("Tổng tiền hàng", currencyFormatter.format(totalGoods))
+                        RowInfo("Phí vận chuyển", currencyFormatter.format(shippingFee))
+                        RowInfo("Giảm phí vận chuyển", "-${currencyFormatter.format(shippingDiscount)}")
+                        RowInfo("Giảm voucher", "-${currencyFormatter.format(discountAmount)}")
                         Divider(modifier = Modifier.padding(vertical = 8.dp), color = DeepTeal)
                         RowInfo(
                             label = "Tổng thanh toán",
-                            value = "${totalPayment}đ",
+                            value = currencyFormatter.format(totalPayment),
                             valueStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = DeepTeal)
                         )
                     }
@@ -321,6 +311,9 @@ fun RowInfo(
 
 @Composable
 fun ProductItem(product: Product) {
+    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
+        maximumFractionDigits = 0
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -343,8 +336,9 @@ fun ProductItem(product: Product) {
         Column(modifier = Modifier.weight(1f)) {
             Text(product.name, fontWeight = FontWeight.Medium, color = DeepTeal)
             Text("x${product.quantity}", color = DeepTeal, fontSize = 13.sp)
+            Text(product.price.toString(), color = DeepTeal, fontSize = 13.sp)
         }
-        Text("${product.price * product.quantity}đ", color = DeepTeal)
+        Text(currencyFormatter.format(product.price * product.quantity), color = DeepTeal)
     }
 }
 
@@ -357,25 +351,175 @@ data class Product(
     val imageUrl : String
 )
 
-data class Voucher(
-    val code: String,
-    val discountAmount: Int
-)
-@Preview(showBackground = true)
+
+//@Preview(showBackground = true)
+//@Composable
+//fun CheckoutScreenPreview() {
+//    val sampleProducts = listOf(
+//        Product(id= 1,name = "Áo thun nam", price = 120000, quantity = 2, imageUrl = ""),
+//        Product(id= 2,name = "Quần jean nữ", price = 250000, quantity = 1, imageUrl = ""),
+//        Product(id= 3,name = "Giày thể thao", price = 500000, quantity = 1,  imageUrl = "")
+//    )
+//
+//    val sampleVoucher = Voucher(code = "GIAM50K", discountAmount = 50000)
+//
+//    CheckoutScreen(
+//        products = sampleProducts,
+//        voucher = sampleVoucher,
+//        onPlaceOrderClick = {},
+//        onBackClick = {}
+//    )
+//}
+
+@Preview
 @Composable
-fun CheckoutScreenPreview() {
-    val sampleProducts = listOf(
-        Product(id= 1,name = "Áo thun nam", price = 120000, quantity = 2, imageUrl = ""),
-        Product(id= 2,name = "Quần jean nữ", price = 250000, quantity = 1, imageUrl = ""),
-        Product(id= 3,name = "Giày thể thao", price = 500000, quantity = 1,  imageUrl = "")
-    )
+fun VoucherSectionPreview(
 
-    val sampleVoucher = Voucher(code = "GIAM50K", discountAmount = 50000)
-
-    CheckoutScreen(
-        products = sampleProducts,
-        voucher = sampleVoucher,
-        onPlaceOrderClick = {},
-        onBackClick = {}
+) {
+    VoucherSection(
+        hasShippingVoucher = true,
+        discountVoucherAmount = "123"
     )
+}
+@Composable
+fun VoucherSection(
+    hasShippingVoucher: Boolean = true,
+    discountVoucherAmount: String? = null,
+    onVoucherClick: () -> Unit = {}
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header Row with Voucher title and Navigate Icon
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.ConfirmationNumber,
+                        contentDescription = "Voucher Icon",
+                        tint = Color(0xFFEE4D2D),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Shopee Voucher",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (hasShippingVoucher) {
+                        VoucherChip(
+                            text = "Miễn Phí Vận Chuyển",
+                            isShippingVoucher = true,
+                            onClick = onVoucherClick,
+                        )
+                    } else if (discountVoucherAmount != null) {
+                        VoucherChip(
+                            text = "Giảm ${discountVoucherAmount}đ",
+                            isShippingVoucher = false,
+                            onClick = onVoucherClick
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Navigate",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(20.dp).clickable {
+                            onVoucherClick()
+                        }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(7.dp))
+
+            Divider(
+                color = Color.LightGray,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+            )
+            Spacer(modifier = Modifier.height(7.dp))
+
+            // Coin Usage Row (Không thể sử dụng Xu)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // For the coin icon, you can create a simple circle with an S inside
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(Color(0xFFF9A825), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "S",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+                Text(
+                    text = "Không thể sử dụng Xu",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.DarkGray
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "Info",
+                    tint = Color.LightGray,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+// Voucher Chip Component
+@Composable
+fun VoucherChip(
+    text: String,
+    isShippingVoucher: Boolean = false,
+    onClick: () -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .clip(
+                RoundedCornerShape(
+                    topStart = 4.dp,
+                    bottomStart = 4.dp,
+                    topEnd = 4.dp,
+                    bottomEnd = 4.dp
+                )
+            )
+            .border(
+                width = 1.dp,
+                color = if (isShippingVoucher) Color(0xFF26AA99) else Color(0xFFEE4D2D),
+                shape = RoundedCornerShape(4.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isShippingVoucher) Color(0xFF26AA99) else Color(0xFFEE4D2D),
+            fontSize = 10.sp
+        )
+    }
 }

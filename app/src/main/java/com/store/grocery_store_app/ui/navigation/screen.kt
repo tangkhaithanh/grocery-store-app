@@ -69,24 +69,16 @@ sealed class Screen(val route: String) {
 
     /* -------------------- Check-out flow -------------------- */
 
-    object CheckOut : Screen("checkout/{selectedProductsJson}") {
+    object CheckOut : Screen("checkout/{selectedProductsJson}/{selectedVoucherJson}") {
 
         /**
          * Pass a JSON string (already encoded/escaped if necessary).
          */
-        fun createRoute(selectedProductsJson: String): String {
+        fun createRoute(selectedProductsJson: String, selectedVoucherJson: String): String {
             //val encoded = URLEncoder.encode(selectedProductsJson, StandardCharsets.UTF_8.toString())
-            return "checkout/$selectedProductsJson"
+            return "checkout/$selectedProductsJson/$selectedVoucherJson"
         }
 
-        /**
-         * Convenience helper to build the route directly from a product list.
-         * Gson is used to convert to JSON before encoding.
-         */
-        fun createRoute(products: List<Product>): String {
-            val json = Gson().toJson(products)
-            return createRoute(json)
-        }
     }
 
     /* -------------------- Address flow -------------------- */

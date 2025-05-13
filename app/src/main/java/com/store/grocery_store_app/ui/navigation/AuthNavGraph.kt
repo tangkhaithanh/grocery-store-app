@@ -1,5 +1,6 @@
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -10,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
+import com.store.grocery_store_app.data.models.response.VoucherResponse
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.EmailVerification.EmailVerificationScreen
 import com.store.grocery_store_app.ui.screens.account.AccountScreen
@@ -321,7 +323,8 @@ fun AuthNavGraph(
                 },
                 onPayment = { selectedProducts ->
                     val json = Uri.encode(Gson().toJson(selectedProducts))
-                    navController.navigate(Screen.CheckOut.createRoute(json))
+                    val selectedVoucherJson = Uri.encode(Gson().toJson(""))  // Chưa chọn voucher, gửi chuỗi rỗng
+                    navController.navigate(Screen.CheckOut.createRoute(json, selectedVoucherJson))
                 },
                 onNavigateVoucher = {
                     navController.navigate(Screen.Voucher.route) {
@@ -333,18 +336,32 @@ fun AuthNavGraph(
 
         composable(
             route = Screen.CheckOut.route,
-            arguments = listOf(navArgument("selectedProductsJson") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("selectedProductsJson") { type = NavType.StringType },
+                navArgument("selectedVoucherJson") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
             // Lấy chuỗi JSON từ tham số route
             val selectedProductsJson = backStackEntry.arguments?.getString("selectedProductsJson") ?: "[]"
-
+            val selectedVoucherJson = backStackEntry.arguments?.getString("selectedVoucherJson") ?: ""
             // Chuyển đổi chuỗi JSON thành danh sách sản phẩm
             val selectedProducts = Gson().fromJson(selectedProductsJson, Array<Product>::class.java).toList()
+            var selectedVoucher: VoucherResponse? = null
+            val savedStateHandle = backStackEntry.savedStateHandle
+            val selectedVoucherFromHandle: VoucherResponse? = savedStateHandle.get<VoucherResponse>("selectedVoucher") // Sử dụng key "selectedVoucher"
+//            try {
+//                Log.d("VoucherParse", "selectedVoucherJson: $selectedVoucherJson")
+//                selectedVoucher = Gson().fromJson(selectedVoucherJson, VoucherResponse::class.java)
+//            } catch (e: Exception) {
+//                Log.e("VoucherParse", "Lỗi parse selectedVoucherJson: ${e.message}")
+//                selectedVoucher = null
+//            }
+
 
             // Hiển thị CheckOutScreen với các sản phẩm đã chọn
             CheckoutScreen(
                 products = selectedProducts,
-                voucher = null,
+                voucher = selectedVoucherFromHandle,
                 onBackClick = {
                     navController.popBackStack()
                 },
@@ -357,6 +374,7 @@ fun AuthNavGraph(
                     navController.navigate(Screen.Voucher.route) {
                         popUpTo(Screen.Voucher.route) { inclusive = true }
                     }
+
                 }
             )
         }
@@ -425,7 +443,16 @@ fun AuthNavGraph(
 
         /* -------------------- Voucher -------------------- */
         composable(Screen.Voucher.route) {
-            VoucherScreen(onConfirm = { /* TODO */ })
+            VoucherScreen(
+                onConfirm = { voucher ->
+                    Log.d("Voucher", voucher.toString())
+                    navController.previousBackStackEntry?.savedStateHandle?.set("selectedVoucher", voucher)
+                    navController.popBackStack()
+                } ,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         /* -------------------- Account -------------------- */
