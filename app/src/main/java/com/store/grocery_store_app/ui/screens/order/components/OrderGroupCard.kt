@@ -31,7 +31,12 @@ import androidx.compose.ui.unit.dp
 import com.store.grocery_store_app.data.models.OrderGroup
 
 @Composable
-fun OrderGroupCard(group: OrderGroup, tab : String, onNavigateToProductDetails: (Long) -> Unit) {
+fun OrderGroupCard(
+    group: OrderGroup,
+    tab : String,
+    onNavigateToProductDetails: (Long) -> Unit,
+    onNavigateToDeliveryDetail: (String) -> Unit = {}
+) {
     var expanded by remember { mutableStateOf(false) }
     val status = when (tab) {
         "Chờ xác nhận" -> "Chờ thanh toán"
@@ -109,7 +114,7 @@ fun OrderGroupCard(group: OrderGroup, tab : String, onNavigateToProductDetails: 
                     OutlinedButton(onClick = { }) { Text("Liên hệ Shop") }
                 }
                 else if(tab == "Chờ giao hàng") {
-                    OutlinedButton(onClick = { }) { Text("Xem đơn hàng") }
+                    OutlinedButton(onClick = { onNavigateToDeliveryDetail(group.orderId) }) { Text("Xem đơn hàng") }
                 }
                 else if(tab == "Đã huỷ") {
                     Button (onClick = { }) { Text("Mua lại") }

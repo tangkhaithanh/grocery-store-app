@@ -151,4 +151,9 @@ interface ApiService {
 
     @DELETE("carts/items/{cartItemId}")
     suspend fun removeCartItem(@Path("cartItemId") id:Long) : Response<ApiResponse<Any>>
+
+    @GET("orders/order")
+    suspend fun getOrder(
+        @Query("orderId") orderId: Long
+    ) : Response<ApiResponse<OrderResponse>>
 }

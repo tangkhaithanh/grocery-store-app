@@ -43,4 +43,32 @@ class OrderRepositoryImpl @Inject constructor(
             emit(Resource.Error("Lỗi không xác định: ${e.message}"))
         }
     }
+
+    override suspend fun getOrder(orderId: Long): Flow<Resource<OrderResponse>> = flow{
+        emit(Resource.Loading())
+        try {
+            val response = apiService.getOrder(orderId)
+
+            if(response.isSuccessful) {
+                response.body()?.let { apiResponse ->
+                    if (apiResponse.success && apiResponse.data != null) {
+                        val order = apiResponse.data
+                        emit(Resource.Success(order))
+                    } else {
+                        emit(Resource.Error(apiResponse.message))
+                    }
+                } ?: emit(Resource.Error("Phản hồi rỗng từ server"))
+            } else {
+                emit(Resource.Error("Lấy đơn hàng thất bại: ${response.message()}"))
+            }
+        }
+        catch (e: HttpException) {
+            Log.d("Error", e.message())
+            emit(Resource.Error("Lỗi HTTP: ${e.message()}"))
+        } catch (e: IOException) {
+            emit(Resource.Error("Không thể kết nối đến máy chủ"))
+        } catch (e: Exception) {
+            Log.d("Error", e.message.toString())
+            emit(Resource.Error("Lỗi không xác định: ${e.message}"))
+        }    }
 }

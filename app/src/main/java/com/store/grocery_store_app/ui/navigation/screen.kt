@@ -98,5 +98,11 @@ sealed class Screen(val route: String) {
     object Account : Screen("account")
 
     object Profile : Screen("profile")
+
+    object DeliveryDetail: Screen("deliveryDetail/{deliveryDetailId}") {
+        fun createRoute(deliveryDetailId: String): String {
+            return "deliveryDetail/$deliveryDetailId"
+        }
+    }
 }
 

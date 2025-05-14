@@ -47,6 +47,7 @@ fun OrderScreen(
     onHome: () -> Unit,
     onNavigateToReviewProduct: (Long, Long) -> Unit,
     onNavigateToProductDetails: (Long) -> Unit,
+    onNavigateToDeliveryDetail: (String) -> Unit
 ) {
     val orderState by orderViewModel.state.collectAsState()
     val isLoading = orderState.isLoading
@@ -131,7 +132,7 @@ fun OrderScreen(
                     } else {
                         val grouped = groupOrders(orderItems)
                         items(grouped) { group ->
-                            OrderGroupCard(group, tabs[selectedTabIndex].title, onNavigateToProductDetails)
+                            OrderGroupCard(group, tabs[selectedTabIndex].title, onNavigateToProductDetails, onNavigateToDeliveryDetail)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }

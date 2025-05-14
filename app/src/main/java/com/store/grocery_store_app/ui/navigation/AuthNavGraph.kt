@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
+import com.store.grocery_store_app.data.models.DeliveryDetail
 import com.store.grocery_store_app.data.models.response.VoucherResponse
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.EmailVerification.EmailVerificationScreen
@@ -32,6 +33,7 @@ import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScree
 import com.store.grocery_store_app.ui.screens.ProductsByCategory.ProductsByCategoryScreen
 import com.store.grocery_store_app.ui.screens.register.RegisterScreen
 import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
+import com.store.grocery_store_app.ui.screens.order.DeliveryDetailScreen
 import com.store.grocery_store_app.ui.screens.profile.ProfileScreen
 import com.store.grocery_store_app.ui.screens.reviews.ReviewProductScreen
 import com.store.grocery_store_app.ui.screens.search.SearchScreen
@@ -289,7 +291,10 @@ fun AuthNavGraph(
                 },
                 onNavigateToProductDetails = { productId ->
                     navController.navigate(Screen.ProductDetails.createRoute(productId))
-                }
+                },
+                onNavigateToDeliveryDetail = { deliveryDetailId ->
+                    navController.navigate(Screen.DeliveryDetail.createRoute(deliveryDetailId))
+                },
             )
         }
 
@@ -477,6 +482,19 @@ fun AuthNavGraph(
         composable(route = Screen.Profile.route) {
             ProfileScreen(
                 onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = Screen.DeliveryDetail.route,
+            arguments = listOf(navArgument("deliveryDetailId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val selectedOrder = backStackEntry.arguments?.getString("deliveryDetailId") ?: ""
+            DeliveryDetailScreen(
+                deliveryOrder = selectedOrder,
+                onBackClicked = {
                     navController.popBackStack()
                 }
             )
