@@ -153,10 +153,8 @@ interface ApiService {
 
     @GET("flash-sale")
     suspend fun getFlashSale() : Response<ApiResponse<List<FlashSaleResponse>>>
-}
-    ): Response<ApiResponse<OrderResponse>>
 
-    // Address APIs (b? sung thêm t? code 2, d?t cu?i d? gi? nguyên th? t? cu)
+    // Address APIs (b? sung thï¿½m t? code 2, d?t cu?i d? gi? nguyï¿½n th? t? cu)
     @GET("address/get-all-addresses")
     suspend fun getAllAddresses(
         @Query("page") page: Int = 0,
