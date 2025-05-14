@@ -11,11 +11,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
-<<<<<<< HEAD
 import com.store.grocery_store_app.data.models.response.AddressDTO
-=======
 import com.store.grocery_store_app.data.models.DeliveryDetail
->>>>>>> remotes/origin/main
 import com.store.grocery_store_app.data.models.response.VoucherResponse
 import com.store.grocery_store_app.ui.navigation.Screen
 import com.store.grocery_store_app.ui.screens.EmailVerification.EmailVerificationScreen
