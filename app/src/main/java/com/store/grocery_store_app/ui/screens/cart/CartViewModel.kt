@@ -259,5 +259,11 @@ class CartViewModel @Inject constructor(
         updateQuantityDebounceJobs.values.forEach { it.cancel() } // Hủy tất cả các job debounce còn lại
         updateQuantityDebounceJobs.clear()
     }
+
+    fun clearSuccessFlag() {
+        _state.update { it.copy(
+            isSuccess = false
+        ) }
+    }
     // --- END: Thêm để dọn dẹp Job khi ViewModel bị hủy ---
 }

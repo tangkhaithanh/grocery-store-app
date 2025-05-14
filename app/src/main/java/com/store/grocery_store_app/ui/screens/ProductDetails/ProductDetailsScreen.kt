@@ -38,12 +38,14 @@ import com.store.grocery_store_app.ui.screens.ProductDetails.components.ProductD
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.ProductDetailsTopBar
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.ProductImageCarousel
 import com.store.grocery_store_app.ui.screens.ProductDetails.components.QuantityInfo
+import com.store.grocery_store_app.ui.screens.cart.CartViewModel
 import com.store.grocery_store_app.ui.screens.reviews.ReviewViewModel
 import com.store.grocery_store_app.ui.screens.reviews.components.ReviewSection
 import com.store.grocery_store_app.ui.screens.reviews.components.SimilarProductsSection
 import com.store.grocery_store_app.ui.theme.DeepTeal
 import com.store.grocery_store_app.ui.theme.ErrorLight
 import com.store.grocery_store_app.ui.theme.Gray600
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
 
@@ -53,6 +55,7 @@ fun ProductDetailsScreen(
     productId: Long,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
     reviewViewModel: ReviewViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onAddToCartSuccess: () -> Unit,
     onNavigateToProduct: (Long) -> Unit, // Thêm callback này để điều hướng đến sản phẩm khác
@@ -68,11 +71,35 @@ fun ProductDetailsScreen(
     var cartButtonPosition by remember { mutableStateOf(Offset.Zero) }
     var addToCartButtonPosition by remember { mutableStateOf(Offset.Zero) }
     var showSheet by remember { mutableStateOf(false) }
+    //snackbar
+    val cartState by cartViewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope() // Dùng scope này cho LaunchedEffect
+
     // Currency formatter for Vietnamese Dong
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
     }
-
+    LaunchedEffect(cartState.isSuccess) {
+        if (cartState.isSuccess) {
+            scope.launch { // Sử dụng scope đã nhớ
+                val result = snackbarHostState.showSnackbar(
+                    message = "Sản phẩm đã được thêm vào giỏ hàng",
+                    actionLabel = "Xem giỏ hàng",
+                    duration = SnackbarDuration.Short,
+                    withDismissAction = true
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    onNavigateToCart() // Gọi callback điều hướng
+                }
+            }
+            cartViewModel.clearSuccessFlag() // Gọi hàm để reset cờ isSuccess trong ViewModel
+            // Sau khi thêm thành công, bạn có thể muốn tự động đóng BottomSheet nếu nó vẫn mở
+            if (showSheet) {
+                showSheet = false // Đóng sheet
+            }
+        }
+    }
     // Load product details
     LaunchedEffect(productId) {
         viewModel.loadProductDetails(productId)
@@ -146,6 +173,17 @@ fun ProductDetailsScreen(
                         )
                     }
                 }
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { snackbarData ->
+                // Tùy chỉnh Snackbar ở đây nếu muốn
+                Snackbar(
+                    snackbarData = snackbarData,
+                    containerColor = if (snackbarData.visuals.actionLabel == "Đóng") Color.Red else Color.Green,
+                    contentColor = Color.White,
+                    actionColor = MaterialTheme.colorScheme.primary // Ví dụ
+                )
             }
         }
     ) { paddingValues ->

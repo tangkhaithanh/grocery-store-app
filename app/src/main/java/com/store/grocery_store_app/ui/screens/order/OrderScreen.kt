@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.store.grocery_store_app.data.models.OrderTab
 import com.store.grocery_store_app.data.models.StatusOrderType
+import com.store.grocery_store_app.data.models.response.OrderResponse
 import com.store.grocery_store_app.ui.screens.order.components.OrderGroupCard
 import com.store.grocery_store_app.ui.screens.order.components.OrderItemCard
 import com.store.grocery_store_app.ui.theme.DeepTeal
@@ -61,7 +62,7 @@ fun OrderScreen(
         OrderTab("Đã huỷ", StatusOrderType.CANCELED)
     )
     val orderItems = orderState.orderItems
-
+    val orders = orderState.orders
 
     Column(
         modifier = Modifier
@@ -122,9 +123,9 @@ fun OrderScreen(
                     // Categories row with adjusted spacing
                     if (isDelivered) {
 
-                        items(orderItems) { order ->
+                        items(orderItems) { orderItem ->
                             OrderItemCard(
-                                order,
+                                orderItem = orderItem,
                                 onNavigateToReviewProduct
                             )
                             Spacer(modifier = Modifier.height(8.dp))

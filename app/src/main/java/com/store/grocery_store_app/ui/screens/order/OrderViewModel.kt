@@ -21,6 +21,7 @@ data class OrderState(
     val orderItems: List<OrderItem> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
+    val isUpdateStatus : Boolean = false,
     val selectedTabIndex: Int = 0
 )
 
@@ -39,7 +40,6 @@ class OrderViewModel @Inject constructor(
     }
 
     fun loadOrders(status: StatusOrderType = StatusOrderType.ALL) {
-        Log.d("Get Data: ", status.toString())
         viewModelScope.launch {
             orderRepository.getOrders(typeStatusOrder = status).collect { result ->
                 when (result) {
@@ -97,5 +97,7 @@ class OrderViewModel @Inject constructor(
         return resultList
     }
 
-
+    fun clearError() {
+        _state.update { it.copy(error = null) }
+    }
 }

@@ -13,6 +13,7 @@ import com.store.grocery_store_app.data.models.response.ApiResponse
 import com.store.grocery_store_app.data.models.response.AuthResponse
 import com.store.grocery_store_app.data.models.response.CartResponse
 import com.store.grocery_store_app.data.models.response.CategoryResponse
+import com.store.grocery_store_app.data.models.response.FlashSaleResponse
 import com.store.grocery_store_app.data.models.response.OrderItemResponse
 import com.store.grocery_store_app.data.models.response.OrderResponse
 import com.store.grocery_store_app.data.models.response.PagedResponse
@@ -156,4 +157,7 @@ interface ApiService {
     suspend fun getOrder(
         @Query("orderId") orderId: Long
     ) : Response<ApiResponse<OrderResponse>>
+
+    @GET("flash-sale")
+    suspend fun getFlashSale() : Response<ApiResponse<List<FlashSaleResponse>>>
 }

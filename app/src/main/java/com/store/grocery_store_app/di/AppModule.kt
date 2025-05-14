@@ -10,6 +10,7 @@ import com.store.grocery_store_app.data.repository.CartRepository
 import com.store.grocery_store_app.data.repository.CategoryRepository
 import com.store.grocery_store_app.data.repository.CloudinaryRepository
 import com.store.grocery_store_app.data.repository.FavoriteProductRepository
+import com.store.grocery_store_app.data.repository.FlashSaleRepository
 import com.store.grocery_store_app.data.repository.OrderItemRepository
 import com.store.grocery_store_app.data.repository.OrderRepository
 import com.store.grocery_store_app.data.repository.ProductRepository
@@ -21,6 +22,7 @@ import com.store.grocery_store_app.data.repository.impl.CartRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CategoryRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CloudinaryRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.FavoriteProductRepositoryImpl
+import com.store.grocery_store_app.data.repository.impl.FlashSaleRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.OrderItemRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.OrderRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.ProductRepositoryImpl
@@ -192,5 +194,11 @@ object AppModule {
     @Singleton
     fun provideSharedUserRepository(): SharedUserRepository {
         return SharedUserRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFlashSaleRepository(apiService: ApiService): FlashSaleRepository {
+        return FlashSaleRepositoryImpl(apiService)
     }
 }

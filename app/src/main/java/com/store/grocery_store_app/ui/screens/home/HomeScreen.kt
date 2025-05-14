@@ -14,8 +14,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.store.grocery_store_app.data.models.response.ProductResponse
 import com.store.grocery_store_app.ui.screens.FavoriteProduct.FavoriteProductViewModel
+import com.store.grocery_store_app.ui.screens.FlashSale.FlashSaleSection
 import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
+import com.store.grocery_store_app.ui.screens.cart.CartViewModel
 import com.store.grocery_store_app.ui.screens.home.components.BottomNavigation
 import com.store.grocery_store_app.ui.screens.home.components.HeaderSection
 import com.store.grocery_store_app.ui.screens.home.components.ProfileMenu
@@ -29,7 +32,8 @@ fun HomeScreen(
     categoryViewModel: CategoryViewModel = hiltViewModel(),
     productViewModel: ProductViewModel = hiltViewModel(),
     favouriteViewModel: FavoriteProductViewModel = hiltViewModel(),
-    newArrivalsViewModel: NewArrivalsViewModel = hiltViewModel(),// Thêm ProductViewModel
+    newArrivalsViewModel: NewArrivalsViewModel = hiltViewModel(),
+    cartViewModel : CartViewModel = hiltViewModel(),
     onNavigateToOrder: () -> Unit,
     onNavigateToProductDetails: (Long) -> Unit,
     onNavigateToSearch: () -> Unit,
@@ -43,10 +47,15 @@ fun HomeScreen(
     val categoryState by categoryViewModel.state.collectAsState()
     val isUserLoggedIn = authState.isLoggedIn
     var showProfileMenu by remember { mutableStateOf(false) }
-
+    val cartState by cartViewModel.state.collectAsState()
+    val cartItems = cartState.cartItems
+    val state by productViewModel.state.collectAsState()
+    val flashSales = state.flashSales
     LaunchedEffect(authState.isLoggedIn) {
         if (authState.isLoggedIn) {
+            cartViewModel.getAllCartItem()
             favouriteViewModel.loadFavouriteProducts()
+            productViewModel.loadFlashSale()
         }
     }
 
@@ -80,7 +89,7 @@ fun HomeScreen(
                     onProfileClick = { showProfileMenu = true },
                     onCartClick = onNavigateToCart,             // Dùng callback từ HomeScreen
                     onNavigateToSearch = onNavigateToSearch,    // Dùng cùng callback với onSearchClick
-                    cartItemCount = 5,                         // Có thể thay bằng số lượng thực tế từ giỏ hàng
+                    cartItemCount = cartItems.count(),                         // Có thể thay bằng số lượng thực tế từ giỏ hàng
                     locationName = "TP Hồ Chí Minh, VN",        // Có thể thay bằng vị trí thực tế của người dùng
                 )
 
@@ -93,6 +102,45 @@ fun HomeScreen(
                         // Additional actions when a category is clicked
                     }
                 )
+                if(flashSales.isEmpty()) {
+                    FlashSaleSection(
+                        title = "FlashSale", // Hoặc "Sắp diễn ra", "Không có Flash Sale"
+                        listProduct = emptyList(),       // Danh sách sản phẩm rỗng
+                        isLoading = false,               // Không loading vì chúng ta biết là không có
+                        error = null,                    // Không có lỗi cụ thể ở đây
+                        favouriteViewModel = favouriteViewModel, // Vẫn cần truyền nếu ProductCard yêu cầu
+                        onSeeMoreClick = {
+                            // Có thể không làm gì, hoặc điều hướng đến một trang thông tin chung về FlashSale
+                        },
+                        onProductClick = { /* Sẽ không bao giờ được gọi vì listProduct rỗng */ },
+                        onAddToCartClick = { /* Sẽ không bao giờ được gọi */ }
+                        // Bạn có thể muốn tùy chỉnh icon hoặc màu sắc cho trường hợp "chưa diễn ra" này
+                        // icon = Icons.Default.HourglassEmpty, // Ví dụ
+                        // iconTint = Color.Gray,
+                        // headerColor = Color.DarkGray
+                    )
+                }
+                else {
+                    flashSales.forEach { flashSale ->
+                        val productList: List<ProductResponse> = flashSale.flashSaleItems.map { flashItem ->
+                            flashItem.product
+                        }
+                        FlashSaleSection(
+                            title = flashSale.name,
+                            listProduct = productList,
+                            onSeeMoreClick = {
+                                // Navigate to a full list of best sellers (could be implemented later)
+                            },
+                            onProductClick = { productId ->
+                                // Navigate to product details when a product is clicked
+                                onNavigateToProductDetails(productId)
+                            },
+                            onAddToCartClick = { product ->
+                                // Handle add to cart (could be implemented with CartViewModel)
+                            }
+                        )
+                    }
+                }
 
                 BestSellerProducts(
                     viewModel = productViewModel,

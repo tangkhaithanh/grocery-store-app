@@ -2,8 +2,11 @@ package com.store.grocery_store_app.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.store.grocery_store_app.data.models.response.FlashSaleItemResponse
+import com.store.grocery_store_app.data.models.response.FlashSaleResponse
 import com.store.grocery_store_app.data.models.response.ProductResponse
 import com.store.grocery_store_app.data.repository.CategoryRepository
+import com.store.grocery_store_app.data.repository.FlashSaleRepository
 import com.store.grocery_store_app.data.repository.ProductRepository
 import com.store.grocery_store_app.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,13 +31,15 @@ data class ProductsState(
     val categoryProductsLoading: Boolean = false,
     val categoryProductsError: String? = null,
     val categoryProductsPage: Int = 0,
-    val hasMoreCategoryProducts: Boolean = true
+    val hasMoreCategoryProducts: Boolean = true,
+    val flashSales : List<FlashSaleResponse> = emptyList(),
 )
 
 @HiltViewModel
 class ProductViewModel @Inject constructor(
     private val productRepository: ProductRepository,
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val flashSaleRepository: FlashSaleRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProductsState())
@@ -183,5 +188,35 @@ class ProductViewModel @Inject constructor(
 
     fun clearError() {
         _state.update { it.copy(error = null) }
+    }
+
+    fun loadFlashSale() {
+        viewModelScope.launch {
+            flashSaleRepository.getFlashSale().collect { result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        _state.update { it.copy(isLoading = true, error = null) }
+                    }
+                    is Resource.Success -> {
+                        val flashSales = result.data ?: emptyList()
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                flashSales = flashSales,
+                                error = null
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = result.message
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

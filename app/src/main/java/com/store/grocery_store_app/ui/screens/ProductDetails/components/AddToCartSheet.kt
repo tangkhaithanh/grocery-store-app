@@ -99,14 +99,14 @@ fun AddToCartSheet(
             isLoading = cartState.isLoading,
             message = "Đang thêm sản phẩm vào giỏ hàng"
         )
-        if(cartState.isSuccess) {
-            SuccessDialog(
-                title = "Thêm thành công",
-                content = "Sản phẩm đã được thêm vào giỏ hàng",
-                clearError = cartViewModel::clearError,
-                confirmButtonRequest = onNavigateToCart
-            )
-        }
+//        if(cartState.isSuccess) {
+//            SuccessDialog(
+//                title = "Thêm thành công",
+//                content = "Sản phẩm đã được thêm vào giỏ hàng",
+//                clearError = cartViewModel::clearError,
+//                confirmButtonRequest = onNavigateToCart
+//            )
+//        }
         if(cartState.error!=null) {
             ErrorDialog(
                 title = "Thêm thất bại",

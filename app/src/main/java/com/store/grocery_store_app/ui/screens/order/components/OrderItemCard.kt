@@ -1,5 +1,7 @@
 package com.store.grocery_store_app.ui.screens.order.components
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,8 +23,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +49,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 
+@SuppressLint("RememberReturnType")
 @Composable
 fun OrderItemCard(
     orderItem: OrderItem,
@@ -156,12 +162,12 @@ fun OrderItemCard(
                             )
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2196F3), // Màu xanh nổi bật
+                            containerColor = Color(0xFF00796B), // Màu xanh nổi bật
                             contentColor = Color.White
                         ),
-                        shape = RoundedCornerShape(20.dp),
+                        shape = RoundedCornerShape(14.dp),
 
-                    ) {
+                        ) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Đánh giá",
@@ -171,6 +177,8 @@ fun OrderItemCard(
                         Text("Đánh giá")
                     }
                 }
+
+
             }
         }
     }
