@@ -5,6 +5,7 @@ import com.store.grocery_store_app.data.api.ApiService
 import com.store.grocery_store_app.data.api.AuthInterceptor
 import com.store.grocery_store_app.data.api.CloudinaryService
 import com.store.grocery_store_app.data.local.TokenManager
+import com.store.grocery_store_app.data.repository.AddressRepository
 import com.store.grocery_store_app.data.repository.AuthRepository
 import com.store.grocery_store_app.data.repository.CartRepository
 import com.store.grocery_store_app.data.repository.CategoryRepository
@@ -16,6 +17,7 @@ import com.store.grocery_store_app.data.repository.ProductRepository
 import com.store.grocery_store_app.data.repository.ReviewRepository
 import com.store.grocery_store_app.data.repository.UserRepository
 import com.store.grocery_store_app.data.repository.VoucherRepository
+import com.store.grocery_store_app.data.repository.impl.AddressRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.AuthRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CartRepositoryImpl
 import com.store.grocery_store_app.data.repository.impl.CategoryRepositoryImpl
@@ -192,5 +194,11 @@ object AppModule {
     @Singleton
     fun provideSharedUserRepository(): SharedUserRepository {
         return SharedUserRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAddressRepository(apiService: ApiService): AddressRepository {
+        return AddressRepositoryImpl(apiService)
     }
 }

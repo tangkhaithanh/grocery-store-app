@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ConfirmationNumber
@@ -43,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,7 +58,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.store.grocery_store_app.data.models.response.AddressDTO
 import com.store.grocery_store_app.data.models.response.VoucherResponse
 import com.store.grocery_store_app.ui.screens.address.Address
 import java.text.NumberFormat
@@ -71,6 +75,8 @@ private val OffWhite = Color(0xFFF5F5F5)
 fun CheckoutScreen(
     products: List<Product>,
     voucher: VoucherResponse?,
+    selectedAddress: AddressDTO?,
+    checkoutViewModel: CheckoutViewModel = hiltViewModel(),
     onBackClick: () -> Unit = {},
     onPlaceOrderClick: () -> Unit = {},
     onNavigateAddress: () -> Unit = {},
@@ -86,6 +92,12 @@ fun CheckoutScreen(
     var totalPayment = totalGoods + shippingFee - shippingDiscount - discountAmount
     if(totalPayment < 0) totalPayment = 0
 
+    val defaultAddress by checkoutViewModel.defaultAddress.collectAsState()
+    val isLoading by checkoutViewModel.isLoading.collectAsState()
+    val error by checkoutViewModel.error.collectAsState()
+
+    // Sử dụng địa chỉ đã chọn nếu có, nếu không thì sử dụng địa chỉ mặc định
+    val addressToDisplay = selectedAddress ?: defaultAddress
     Scaffold(
         containerColor = OffWhite,
         topBar = {
@@ -165,21 +177,86 @@ fun CheckoutScreen(
                     elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        SectionTitle("Địa chỉ giao hàng")
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 4.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(
-                                Icons.Default.LocationOn,
-                                contentDescription = "Địa chỉ",
-                                modifier = Modifier.size(24.dp),
-                                tint = DeepTeal
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                Text("Nguyễn Văn A - 0901234567", color = DeepTeal)
-                                Text("123 Lý Thường Kiệt, Quận 10, TP.HCM", color = DeepTeal)
+                            SectionTitle("Địa chỉ giao hàng")
+
+                            // Hiển thị nhãn "Mặc định" bên phải tiêu đề nếu địa chỉ được chọn là mặc định
+                            if (addressToDisplay?.isDefault == true) {
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = DeepTeal.copy(alpha = 0.1f)
+                                ) {
+                                    Text(
+                                        text = "Mặc định",
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = DeepTeal,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+
+                        if (addressToDisplay != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.LocationOn,
+                                    contentDescription = "Địa chỉ",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = DeepTeal
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "${addressToDisplay.userName} - ${addressToDisplay.phoneNumber}",
+                                        color = DeepTeal,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = "${addressToDisplay.streetAddress}, ${addressToDisplay.district}, ${addressToDisplay.city}",
+                                        color = DeepTeal,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Icon(
+                                    Icons.Default.ChevronRight,
+                                    contentDescription = "Thay đổi",
+                                    tint = DeepTeal.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        } else {
+                            // Hiển thị khi chưa có địa chỉ
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = "Thêm địa chỉ",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = DeepTeal
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Thêm địa chỉ giao hàng",
+                                    color = DeepTeal,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Icon(
+                                    Icons.Default.ChevronRight,
+                                    contentDescription = "Thêm",
+                                    tint = DeepTeal.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
                     }

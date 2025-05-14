@@ -40,6 +40,7 @@ fun AccountScreen(
     onNavigateToNotification: () -> Unit = {},
     onNavigateToOrder: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToAddress: () -> Unit = {},
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by authViewModel.authState.collectAsState()
@@ -136,7 +137,7 @@ fun AccountScreen(
                     icon = Icons.Default.LocationOn,
                     title = "Sổ địa chỉ",
                     subtitle = "Quản lý thông tin giao hàng",
-                    onClick = { /* TODO: Navigate to Address Book */ }
+                    onClick = onNavigateToAddress
                 ),
                 AccountMenuItem(
                     icon = Icons.Default.Favorite,

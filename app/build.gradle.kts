@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.store.grocery_store_app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.store.grocery_store_app"
@@ -76,6 +76,8 @@ dependencies {
 
     // Dependency Injection - sử dụng KAPT cho Hilt/Dagger
     implementation("com.google.dagger:dagger:2.50")
+    implementation(libs.litert.metadata)
+    implementation(libs.androidx.runtime.livedata)
     kapt("com.google.dagger:dagger-compiler:2.50")
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-android-compiler:2.50")

@@ -1,6 +1,7 @@
 package com.store.grocery_store_app.data.api
 
 import com.store.grocery_store_app.data.models.StatusOrderType
+import com.store.grocery_store_app.data.models.request.AddressRequest
 import com.store.grocery_store_app.data.models.request.AuthRequest
 import com.store.grocery_store_app.data.models.request.CartItemRequest
 import com.store.grocery_store_app.data.models.request.ForgotPasswordRequest
@@ -9,6 +10,7 @@ import com.store.grocery_store_app.data.models.request.OtpVerifyRequest
 import com.store.grocery_store_app.data.models.request.RegisterRequest
 import com.store.grocery_store_app.data.models.request.ReviewRequest
 import com.store.grocery_store_app.data.models.request.UpdateUserRequest
+import com.store.grocery_store_app.data.models.response.AddressDTO
 import com.store.grocery_store_app.data.models.response.ApiResponse
 import com.store.grocery_store_app.data.models.response.AuthResponse
 import com.store.grocery_store_app.data.models.response.CartResponse
@@ -25,6 +27,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -151,4 +154,29 @@ interface ApiService {
 
     @DELETE("carts/items/{cartItemId}")
     suspend fun removeCartItem(@Path("cartItemId") id:Long) : Response<ApiResponse<Any>>
+
+    // Address APIs
+    @GET("address/get-all-addresses")
+    suspend fun getAllAddresses(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 10
+    ): Response<ApiResponse<PagedResponse<AddressDTO>>>
+
+    @GET("address/{id}")
+    suspend fun getAddressById(@Path("id") id: Long): Response<ApiResponse<AddressDTO>>
+
+    @POST("address/create-address")
+    suspend fun createAddress(@Body request: AddressRequest): Response<ApiResponse<Any>>
+
+    @PUT("address/update/{id}")
+    suspend fun updateAddress(
+        @Path("id") id: Long,
+        @Body request: AddressRequest
+    ): Response<ApiResponse<Any>>
+
+    @DELETE("address/delete/{id}")
+    suspend fun deleteAddress(@Path("id") id: Long): Response<ApiResponse<Any>>
+
+    @PATCH("address/set-default/{id}")
+    suspend fun setDefaultAddress(@Path("id") id: Long): Response<ApiResponse<Any>>
 }

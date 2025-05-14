@@ -22,7 +22,7 @@
         tools:replace="android:fullBackupContent">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCZfxhvcmEuv1YnDMsfdXLEdZIn0GiaP5w" />
+            android:value="AIzaSyCZJxCtqqnbdvRijNnV5Zi3lf9fDXErv3E" />
 
         <activity
             android:name=".MainActivity"
