@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
+import com.store.grocery_store_app.data.models.response.AddressDTO
 import com.store.grocery_store_app.data.models.DeliveryDetail
 import com.store.grocery_store_app.data.models.response.VoucherResponse
 import com.store.grocery_store_app.ui.navigation.Screen
@@ -31,6 +32,8 @@ import com.store.grocery_store_app.ui.screens.order.OrderScreen
 import com.store.grocery_store_app.ui.screens.otp.OtpVerificationScreen
 import com.store.grocery_store_app.ui.screens.ProductDetails.ProductDetailsScreen
 import com.store.grocery_store_app.ui.screens.ProductsByCategory.ProductsByCategoryScreen
+import com.store.grocery_store_app.ui.screens.address.AddAddressScreen
+import com.store.grocery_store_app.ui.screens.address.AddressScreen
 import com.store.grocery_store_app.ui.screens.register.RegisterScreen
 import com.store.grocery_store_app.ui.screens.forgotpassword.ResetPasswordScreen
 import com.store.grocery_store_app.ui.screens.order.DeliveryDetailScreen
@@ -40,6 +43,10 @@ import com.store.grocery_store_app.ui.screens.search.SearchScreen
 import com.store.grocery_store_app.ui.screens.splash.SplashScreen
 import com.store.grocery_store_app.ui.screens.voucher.VoucherScreen
 import com.store.grocery_store_app.utils.AuthPurpose
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.LiveData
+import com.store.grocery_store_app.ui.screens.address.SelectAddressScreen
 
 /**
  * AuthNavGraph kết hợp logic của cả hai nhánh mà không còn conflict.
@@ -339,6 +346,7 @@ fun AuthNavGraph(
             )
         }
 
+        // Sửa lại phần CheckOut composable trong NavGraph
         composable(
             route = Screen.CheckOut.route,
             arguments = listOf(
@@ -349,38 +357,41 @@ fun AuthNavGraph(
             // Lấy chuỗi JSON từ tham số route
             val selectedProductsJson = backStackEntry.arguments?.getString("selectedProductsJson") ?: "[]"
             val selectedVoucherJson = backStackEntry.arguments?.getString("selectedVoucherJson") ?: ""
+
             // Chuyển đổi chuỗi JSON thành danh sách sản phẩm
-            val selectedProducts = Gson().fromJson(selectedProductsJson, Array<Product>::class.java).toList()
-            var selectedVoucher: VoucherResponse? = null
-            val savedStateHandle = backStackEntry.savedStateHandle
-            val selectedVoucherFromHandle: VoucherResponse? = savedStateHandle.get<VoucherResponse>("selectedVoucher") // Sử dụng key "selectedVoucher"
-//            try {
-//                Log.d("VoucherParse", "selectedVoucherJson: $selectedVoucherJson")
-//                selectedVoucher = Gson().fromJson(selectedVoucherJson, VoucherResponse::class.java)
-//            } catch (e: Exception) {
-//                Log.e("VoucherParse", "Lỗi parse selectedVoucherJson: ${e.message}")
-//                selectedVoucher = null
-//            }
+            val selectedProducts = try {
+                Gson().fromJson(selectedProductsJson, Array<Product>::class.java).toList()
+            } catch (e: Exception) {
+                Log.e("CheckOut", "Error parsing products JSON: ${e.message}")
+                emptyList()
+            }
 
+            // Lấy voucher từ saved state handle
+            val selectedVoucherFromHandle: VoucherResponse? = backStackEntry.savedStateHandle.get<VoucherResponse>("selectedVoucher")
 
-            // Hiển thị CheckOutScreen với các sản phẩm đã chọn
+            // Lấy address từ saved state handle
+            val selectedAddressFromHandle: AddressDTO? = backStackEntry.savedStateHandle.get<AddressDTO>("selectedAddress")
+
             CheckoutScreen(
                 products = selectedProducts,
                 voucher = selectedVoucherFromHandle,
+                selectedAddress = selectedAddressFromHandle,
                 onBackClick = {
                     navController.popBackStack()
                 },
                 onNavigateAddress = {
-                    navController.navigate(Screen.Address.route) {
-                        popUpTo(Screen.Address.route) { inclusive = true }
-                    }
+                    navController.navigate(
+                        Screen.SelectAddress.createRoute(selectedAddressFromHandle?.id)
+                    )
                 },
                 onNavigateVoucher = {
                     navController.navigate(Screen.Voucher.route) {
                         popUpTo(Screen.Voucher.route) { inclusive = true }
                     }
-
-                }
+                },
+                /*onNavigateAddAddress = {
+                    navController.navigate(Screen.AddAddress.route)
+                }*/
             )
         }
 
@@ -388,64 +399,64 @@ fun AuthNavGraph(
 
         // Address List
         composable(Screen.Address.route) {
-            val sampleAddresses = listOf(
-                Address(
-                    id = "1",
-                    recipient = "Nguyễn Văn A",
-                    phone = "0901234567",
-                    street = "123 Lý Thường Kiệt",
-                    building = "Tòa nhà ABC",
-                    province = "TP.HCM",
-                    district = "Quận 10",
-                    ward = "Phường 5",
-                    latLng = null
-                ),
-                Address(
-                    id = "2",
-                    recipient = "Trần Thị B",
-                    phone = "0912345678",
-                    street = "456 Hai Bà Trưng",
-                    building = "Chung cư XYZ",
-                    province = "Hà Nội",
-                    district = "Quận Hoàn Kiếm",
-                    ward = "Phường Hàng Bạc",
-                    latLng = null
-                )
-            )
-
-            AddressListScreen(
-                addresses = sampleAddresses,
-                selectedId = "1",
-                onSelect = { /* TODO */ },
-                onEdit = { addressId ->
+            AddressScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToAddAddress = {
+                   navController.navigate(Screen.AddAddress.route)
+                },
+                onNavigateToEditAddress = { addressId ->
                     navController.navigate(Screen.EditAddress.createRoute(addressId))
                 }
             )
         }
-
-        // Edit Address
-        composable(
-            route = Screen.EditAddress.route,
-            arguments = listOf(navArgument("addressId") { type = NavType.LongType })
-        ) {
-            val sample = Address(
-                id = "1",
-                recipient = "Nguyễn Văn A",
-                phone = "0901234567",
-                street = "123 Lý Thường Kiệt",
-                building = "Tòa nhà ABC",
-                province = "TP.HCM",
-                district = "Quận 10",
-                ward = "Phường 5",
-                latLng = LatLng(10.762622, 106.660172)
-            )
-
-            EditAddressScreen(
-                address = sample,
-                onSave = { /* TODO */ }
+        // Add Address Screen
+        composable(Screen.AddAddress.route) {
+            AddAddressScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
             )
         }
 
+        // Edit Address Screen
+        composable(
+            route = Screen.EditAddress.route,
+            arguments = listOf(navArgument("addressId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val addressId = backStackEntry.arguments?.getLong("addressId") ?: 0L
+
+            EditAddressScreen(
+                addressId = addressId,
+                onNavigateBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.SelectAddress.route,
+            arguments = listOf(
+                navArgument("selectedAddressId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val selectedAddressId = backStackEntry.arguments?.getLong("selectedAddressId", -1L)
+                ?.takeIf { it != -1L }
+
+            SelectAddressScreen(
+                selectedAddressId = selectedAddressId,
+                onSelectAddress = { address ->
+                    // Trả địa chỉ đã chọn về CheckOut screen
+                    navController.previousBackStackEntry?.savedStateHandle?.set("selectedAddress", address)
+                    navController.popBackStack()
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
         /* -------------------- Voucher -------------------- */
         composable(Screen.Voucher.route) {
             VoucherScreen(
@@ -473,8 +484,10 @@ fun AuthNavGraph(
                 onNavigateToOrder = { navController.navigate(Screen.Order.route) } ,
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
+                },
+                onNavigateToAddress = {
+                    navController.navigate(Screen.Address.route)
                 }
-
             )
         }
 
@@ -501,4 +514,5 @@ fun AuthNavGraph(
         }
     }
 }
+
 

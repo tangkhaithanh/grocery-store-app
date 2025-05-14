@@ -22,14 +22,10 @@ import com.store.grocery_store_app.data.models.response.ReviewResponse
 import com.store.grocery_store_app.data.models.response.ReviewStatsResponse
 import com.store.grocery_store_app.data.models.response.UserDTO
 import com.store.grocery_store_app.data.models.response.VoucherResponse
+import com.store.grocery_store_app.data.models.request.*
+import com.store.grocery_store_app.data.models.response.*
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface ApiService {
     @POST("auth/login")
@@ -67,8 +63,7 @@ interface ApiService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20,
         @Query("typeStatusOrder") typeStatusOrder: StatusOrderType = StatusOrderType.ALL
-    ) : Response<ApiResponse<PagedResponse<OrderResponse>>>
-
+    ): Response<ApiResponse<PagedResponse<OrderResponse>>>
 
     @GET("favourites/get")
     suspend fun getFavouriteProducts(): Response<ApiResponse<List<ProductResponse>>>
@@ -100,7 +95,6 @@ interface ApiService {
         @Path("productId") productId: Long
     ): Response<ApiResponse<ReviewStatsResponse>>
 
-
     @GET("product/by-category/{categoryId}")
     suspend fun getProductsByCategory(
         @Path("categoryId") categoryId: Long,
@@ -110,8 +104,8 @@ interface ApiService {
 
     @GET("orderItems")
     suspend fun getOrderItemById(
-        @Query("orderItemId") orderItemId : Long
-    ) : Response<ApiResponse<OrderItemResponse>>
+        @Query("orderItemId") orderItemId: Long
+    ): Response<ApiResponse<OrderItemResponse>>
 
     @GET("product/search")
     suspend fun searchProducts(
@@ -122,25 +116,25 @@ interface ApiService {
 
     @POST("reviews/add")
     suspend fun createReview(
-        @Body reviewRequest : ReviewRequest,
-        @Query("orderItemId") orderItemId : Long
-    ) : Response<ApiResponse<Any>>
+        @Body reviewRequest: ReviewRequest,
+        @Query("orderItemId") orderItemId: Long
+    ): Response<ApiResponse<Any>>
 
     @POST("carts/addToCart")
     suspend fun insertProductIntoCart(
         @Body cartItemRequest: CartItemRequest
-    ) : Response<ApiResponse<Any>>
+    ): Response<ApiResponse<Any>>
 
     @POST("carts/updateToCart")
     suspend fun updateProductIntoCart(
         @Body cartItemRequest: CartItemRequest
-    ) : Response<ApiResponse<Any>>
+    ): Response<ApiResponse<Any>>
 
     @GET("carts")
-    suspend fun getAllCartItem() : Response<ApiResponse<CartResponse>>
+    suspend fun getAllCartItem(): Response<ApiResponse<CartResponse>>
 
     @GET("vouchers")
-    suspend fun getAllVoucher() : Response<ApiResponse<List<VoucherResponse>>>
+    suspend fun getAllVoucher(): Response<ApiResponse<List<VoucherResponse>>>
 
     // API for user:
     @GET("user/{id}")
@@ -149,9 +143,8 @@ interface ApiService {
     @PUT("user/update/{id}")
     suspend fun updateUser(@Path("id") id: Long, @Body request: UpdateUserRequest): Response<ApiResponse<UserDTO>>
 
-
     @DELETE("carts/items/{cartItemId}")
-    suspend fun removeCartItem(@Path("cartItemId") id:Long) : Response<ApiResponse<Any>>
+    suspend fun removeCartItem(@Path("cartItemId") id: Long): Response<ApiResponse<Any>>
 
     @GET("orders/order")
     suspend fun getOrder(
@@ -160,4 +153,31 @@ interface ApiService {
 
     @GET("flash-sale")
     suspend fun getFlashSale() : Response<ApiResponse<List<FlashSaleResponse>>>
+}
+    ): Response<ApiResponse<OrderResponse>>
+
+    // Address APIs (b? sung thêm t? code 2, d?t cu?i d? gi? nguyên th? t? cu)
+    @GET("address/get-all-addresses")
+    suspend fun getAllAddresses(
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 10
+    ): Response<ApiResponse<PagedResponse<AddressDTO>>>
+
+    @GET("address/{id}")
+    suspend fun getAddressById(@Path("id") id: Long): Response<ApiResponse<AddressDTO>>
+
+    @POST("address/create-address")
+    suspend fun createAddress(@Body request: AddressRequest): Response<ApiResponse<Any>>
+
+    @PUT("address/update/{id}")
+    suspend fun updateAddress(
+        @Path("id") id: Long,
+        @Body request: AddressRequest
+    ): Response<ApiResponse<Any>>
+
+    @DELETE("address/delete/{id}")
+    suspend fun deleteAddress(@Path("id") id: Long): Response<ApiResponse<Any>>
+
+    @PATCH("address/set-default/{id}")
+    suspend fun setDefaultAddress(@Path("id") id: Long): Response<ApiResponse<Any>>
 }

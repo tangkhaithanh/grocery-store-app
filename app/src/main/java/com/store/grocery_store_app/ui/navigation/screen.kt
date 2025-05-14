@@ -75,15 +75,21 @@ sealed class Screen(val route: String) {
          * Pass a JSON string (already encoded/escaped if necessary).
          */
         fun createRoute(selectedProductsJson: String, selectedVoucherJson: String): String {
-            //val encoded = URLEncoder.encode(selectedProductsJson, StandardCharsets.UTF_8.toString())
             return "checkout/$selectedProductsJson/$selectedVoucherJson"
         }
-
     }
 
     /* -------------------- Address flow -------------------- */
 
     object Address : Screen("address")
+
+    object AddAddress : Screen("add_address")
+
+    object SelectAddress : Screen("select_address/{selectedAddressId}") {
+        fun createRoute(selectedAddressId: Long?): String {
+            return "select_address/${selectedAddressId ?: -1}"
+        }
+    }
 
     object EditAddress : Screen("edit_address/{addressId}") {
         fun createRoute(addressId: Long): String = "edit_address/$addressId"
@@ -99,10 +105,10 @@ sealed class Screen(val route: String) {
 
     object Profile : Screen("profile")
 
+    /* -------------------- Delivery Detail -------------------- */
     object DeliveryDetail: Screen("deliveryDetail/{deliveryDetailId}") {
         fun createRoute(deliveryDetailId: String): String {
             return "deliveryDetail/$deliveryDetailId"
         }
     }
 }
-
