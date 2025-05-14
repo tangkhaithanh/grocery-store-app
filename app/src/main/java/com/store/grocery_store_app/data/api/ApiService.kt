@@ -1,37 +1,10 @@
 package com.store.grocery_store_app.data.api
 
 import com.store.grocery_store_app.data.models.StatusOrderType
-import com.store.grocery_store_app.data.models.request.AddressRequest
-import com.store.grocery_store_app.data.models.request.AuthRequest
-import com.store.grocery_store_app.data.models.request.CartItemRequest
-import com.store.grocery_store_app.data.models.request.ForgotPasswordRequest
-import com.store.grocery_store_app.data.models.request.OtpRequest
-import com.store.grocery_store_app.data.models.request.OtpVerifyRequest
-import com.store.grocery_store_app.data.models.request.RegisterRequest
-import com.store.grocery_store_app.data.models.request.ReviewRequest
-import com.store.grocery_store_app.data.models.request.UpdateUserRequest
-import com.store.grocery_store_app.data.models.response.AddressDTO
-import com.store.grocery_store_app.data.models.response.ApiResponse
-import com.store.grocery_store_app.data.models.response.AuthResponse
-import com.store.grocery_store_app.data.models.response.CartResponse
-import com.store.grocery_store_app.data.models.response.CategoryResponse
-import com.store.grocery_store_app.data.models.response.OrderItemResponse
-import com.store.grocery_store_app.data.models.response.OrderResponse
-import com.store.grocery_store_app.data.models.response.PagedResponse
-import com.store.grocery_store_app.data.models.response.ProductResponse
-import com.store.grocery_store_app.data.models.response.ReviewResponse
-import com.store.grocery_store_app.data.models.response.ReviewStatsResponse
-import com.store.grocery_store_app.data.models.response.UserDTO
-import com.store.grocery_store_app.data.models.response.VoucherResponse
+import com.store.grocery_store_app.data.models.request.*
+import com.store.grocery_store_app.data.models.response.*
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.PATCH
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface ApiService {
     @POST("auth/login")
@@ -69,8 +42,7 @@ interface ApiService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20,
         @Query("typeStatusOrder") typeStatusOrder: StatusOrderType = StatusOrderType.ALL
-    ) : Response<ApiResponse<PagedResponse<OrderResponse>>>
-
+    ): Response<ApiResponse<PagedResponse<OrderResponse>>>
 
     @GET("favourites/get")
     suspend fun getFavouriteProducts(): Response<ApiResponse<List<ProductResponse>>>
@@ -102,7 +74,6 @@ interface ApiService {
         @Path("productId") productId: Long
     ): Response<ApiResponse<ReviewStatsResponse>>
 
-
     @GET("product/by-category/{categoryId}")
     suspend fun getProductsByCategory(
         @Path("categoryId") categoryId: Long,
@@ -112,8 +83,8 @@ interface ApiService {
 
     @GET("orderItems")
     suspend fun getOrderItemById(
-        @Query("orderItemId") orderItemId : Long
-    ) : Response<ApiResponse<OrderItemResponse>>
+        @Query("orderItemId") orderItemId: Long
+    ): Response<ApiResponse<OrderItemResponse>>
 
     @GET("product/search")
     suspend fun searchProducts(
@@ -124,25 +95,25 @@ interface ApiService {
 
     @POST("reviews/add")
     suspend fun createReview(
-        @Body reviewRequest : ReviewRequest,
-        @Query("orderItemId") orderItemId : Long
-    ) : Response<ApiResponse<Any>>
+        @Body reviewRequest: ReviewRequest,
+        @Query("orderItemId") orderItemId: Long
+    ): Response<ApiResponse<Any>>
 
     @POST("carts/addToCart")
     suspend fun insertProductIntoCart(
         @Body cartItemRequest: CartItemRequest
-    ) : Response<ApiResponse<Any>>
+    ): Response<ApiResponse<Any>>
 
     @POST("carts/updateToCart")
     suspend fun updateProductIntoCart(
         @Body cartItemRequest: CartItemRequest
-    ) : Response<ApiResponse<Any>>
+    ): Response<ApiResponse<Any>>
 
     @GET("carts")
-    suspend fun getAllCartItem() : Response<ApiResponse<CartResponse>>
+    suspend fun getAllCartItem(): Response<ApiResponse<CartResponse>>
 
     @GET("vouchers")
-    suspend fun getAllVoucher() : Response<ApiResponse<List<VoucherResponse>>>
+    suspend fun getAllVoucher(): Response<ApiResponse<List<VoucherResponse>>>
 
     // API for user:
     @GET("user/{id}")
@@ -151,11 +122,15 @@ interface ApiService {
     @PUT("user/update/{id}")
     suspend fun updateUser(@Path("id") id: Long, @Body request: UpdateUserRequest): Response<ApiResponse<UserDTO>>
 
-
     @DELETE("carts/items/{cartItemId}")
-    suspend fun removeCartItem(@Path("cartItemId") id:Long) : Response<ApiResponse<Any>>
+    suspend fun removeCartItem(@Path("cartItemId") id: Long): Response<ApiResponse<Any>>
 
-    // Address APIs
+    @GET("orders/order")
+    suspend fun getOrder(
+        @Query("orderId") orderId: Long
+    ): Response<ApiResponse<OrderResponse>>
+
+    // Address APIs (b? sung thêm t? code 2, d?t cu?i d? gi? nguyên th? t? cu)
     @GET("address/get-all-addresses")
     suspend fun getAllAddresses(
         @Query("page") page: Int = 0,

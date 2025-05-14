@@ -6,5 +6,6 @@ enum class StatusOrderType {
     CONFIRMED,
     SHIPPED,
     DELIVERED,
+    COMPLETED,
     CANCELED
 }

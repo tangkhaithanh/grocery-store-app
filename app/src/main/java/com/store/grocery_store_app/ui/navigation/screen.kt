@@ -70,6 +70,7 @@ sealed class Screen(val route: String) {
     /* -------------------- Check-out flow -------------------- */
 
     object CheckOut : Screen("checkout/{selectedProductsJson}/{selectedVoucherJson}") {
+
         /**
          * Pass a JSON string (already encoded/escaped if necessary).
          */
@@ -103,4 +104,11 @@ sealed class Screen(val route: String) {
     object Account : Screen("account")
 
     object Profile : Screen("profile")
+
+    /* -------------------- Delivery Detail -------------------- */
+    object DeliveryDetail: Screen("deliveryDetail/{deliveryDetailId}") {
+        fun createRoute(deliveryDetailId: String): String {
+            return "deliveryDetail/$deliveryDetailId"
+        }
+    }
 }
