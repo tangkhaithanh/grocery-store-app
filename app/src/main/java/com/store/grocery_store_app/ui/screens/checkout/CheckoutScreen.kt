@@ -83,6 +83,7 @@ fun CheckoutScreen(
     onBackClick: () -> Unit = {},
     onNavigateAddress: () -> Unit = {},
     onNavigateVoucher: () -> Unit = {},
+    onNavigateVnPay: () -> Unit = {},
     onOrderSuccess: (CreateOrderResponse) -> Unit = {}
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
@@ -186,7 +187,7 @@ fun CheckoutScreen(
                                         }
                                         "VNPay" -> {
                                             // TODO: Xử lý thanh toán VNPay
-                                            //checkoutViewModel.showError("VNPay payment chưa được implement")
+                                            onNavigateVnPay()
                                         }
                                         else -> {
                                             checkoutViewModel.showError("Phương thức thanh toán không hợp lệ")
