@@ -73,4 +73,32 @@ class OrderRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun cancelOrder(orderId: Long): Flow<Resource<Boolean>> = flow {
+        emit(Resource.Loading())
+        try {
+            val response = apiService.cancelOrder(orderId)
+
+            if(response.isSuccessful) {
+                response.body()?.let { apiResponse ->
+                    if (apiResponse.success) {
+                        emit(Resource.Success(true))
+                    } else {
+                        emit(Resource.Error(apiResponse.message))
+                    }
+                } ?: emit(Resource.Error("Phản hồi rỗng từ server"))
+            } else {
+                emit(Resource.Error("Hủy đơn hàng thất bại: ${response.message()}"))
+            }
+        }
+        catch (e: HttpException) {
+            Log.d("Error", e.message())
+            emit(Resource.Error("Lỗi HTTP: ${e.message()}"))
+        } catch (e: IOException) {
+            emit(Resource.Error("Không thể kết nối đến máy chủ"))
+        } catch (e: Exception) {
+            Log.d("Error", e.message.toString())
+            emit(Resource.Error("Lỗi không xác định: ${e.message}"))
+        }
+    }
+
 }

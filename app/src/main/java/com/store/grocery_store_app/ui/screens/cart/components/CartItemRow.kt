@@ -332,7 +332,7 @@ fun SwipeableCartItemRow(
                     contentAlignment = Alignment.Center,
                 ) {
                     TextButton(onClick = onShowSimilar) {
-                        Text("Sản phẩm tương tự", textAlign = TextAlign.Center,
+                        Text("Yêu thích", textAlign = TextAlign.Center,
                             color = Color.White
                         )
                     }

@@ -118,4 +118,6 @@ dependencies {
     implementation("com.google.maps.android:maps-compose:5.0.0")
     // https://mvnrepository.com/artifact/com.google.android.gms/play-services-maps
     implementation("com.google.android.gms:play-services-maps:17.0.0")
+    implementation("androidx.webkit:webkit:1.10.0")
+
 }

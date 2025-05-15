@@ -80,7 +80,8 @@ fun CheckoutScreen(
     onBackClick: () -> Unit = {},
     onPlaceOrderClick: () -> Unit = {},
     onNavigateAddress: () -> Unit = {},
-    onNavigateVoucher: () -> Unit = {}
+    onNavigateVoucher: () -> Unit = {},
+    onNavigateVnPay: () -> Unit = {}
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -142,7 +143,9 @@ fun CheckoutScreen(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = onPlaceOrderClick,
+                        onClick = {
+                            onNavigateVnPay()
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
