@@ -167,26 +167,6 @@ fun EditAddressScreen(
                             errorMessage = addressState.streetAddressError ?: ""
                         )
 
-                        // Default Address Checkbox
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = addressState.formIsDefault,
-                                onCheckedChange = { addressViewModel.updateFormIsDefault(it) },
-                                colors = CheckboxDefaults.colors(
-                                    checkedColor = MaterialTheme.colorScheme.primary
-                                )
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Đặt làm địa chỉ mặc định",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
                         // Error message if any
                         if (addressState.error != null) {
                             Card(

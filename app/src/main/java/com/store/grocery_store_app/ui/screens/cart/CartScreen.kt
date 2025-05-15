@@ -227,7 +227,8 @@ fun CartScreen(
                                                 } else {
                                                     "https://onelife.vn/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fsc_pcm_product%2Fprod%2F2023%2F12%2F15%2F19248-8936079121822.jpg&w=1920&q=75"
                                                 },
-                                                quantity = it.quantity
+                                                quantity = it.quantity,
+                                                flashSaleItemId = it.flashSaleId
                                             )
                                         }
                                     if(flag) {
