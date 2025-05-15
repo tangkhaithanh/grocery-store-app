@@ -397,10 +397,16 @@ fun AuthNavGraph(
                     navController.navigate(Screen.VnPay.route) {
                         popUpTo(Screen.VnPay.route) { inclusive = true }
                     }
+                },
+                onOrderSuccess = { response ->
+                    // Navigate đến Order và clear back stack về Home
+                    navController.navigate(Screen.Order.route) {
+                        popUpTo(Screen.Home.route) {
+                            inclusive = false  // Giữ Home screen
+                        }
+                        launchSingleTop = true
+                    }
                 }
-                /*onNavigateAddAddress = {
-                    navController.navigate(Screen.AddAddress.route)
-                }*/
             )
         }
 

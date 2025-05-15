@@ -184,8 +184,16 @@ interface ApiService {
     @PATCH("address/set-default/{id}")
     suspend fun setDefaultAddress(@Path("id") id: Long): Response<ApiResponse<Any>>
 
+
+
+
+
+
     @POST("orders/cancel")
     suspend fun cancelOrder(
         @Body orderId: Long
     ) : Response<ApiResponse<Boolean>>
+
+    @POST("orders/create")
+    suspend fun createOrder(@Body request: CreateOrderRequest): Response<ApiResponse<CreateOrderResponse>>
 }
