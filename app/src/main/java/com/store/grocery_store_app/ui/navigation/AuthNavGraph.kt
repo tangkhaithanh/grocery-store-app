@@ -342,6 +342,9 @@ fun AuthNavGraph(
                     navController.navigate(Screen.Voucher.route) {
                         popUpTo(Screen.Voucher.route) { inclusive = true }
                     }
+                },
+                onNavigateToProductDetails = { productId ->
+                    navController.navigate(Screen.ProductDetails.createRoute(productId))
                 }
             )
         }

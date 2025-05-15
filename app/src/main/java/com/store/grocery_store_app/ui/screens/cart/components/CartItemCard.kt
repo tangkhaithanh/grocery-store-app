@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,13 +33,18 @@ fun CartItemCard(
     onRemove:(Long) -> Unit,
     onQuantityIncrease: () -> Unit,
     onQuantityDecrease: () -> Unit,
+    onNavigateToProductDetails: (Long) -> Unit
 ) {
+    var color = Color.White
+    if(cartItem.price < 0.toBigDecimal()) {
+        color = Color(0xFFFAE3E0)
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), // ✅ Sửa ở đây
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFFFFF) // Đặt containerColor để áp dụng chính xác cho Card
+            containerColor = color // Đặt containerColor để áp dụng chính xác cho Card
         )
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -53,7 +59,11 @@ fun CartItemCard(
                             .background(Color.Red, RoundedCornerShape(4.dp))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
-                        Text("Yêu thích", color = Color.White, fontSize = 12.sp)
+                        Text(
+                            text = if(cartItem.price> 0.toBigDecimal()) "Yêu thích" else "Flash Sale",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Grocery", fontWeight = FontWeight.SemiBold)
@@ -70,8 +80,20 @@ fun CartItemCard(
                 onShowSimilar = {},
                 onCheckedChange = onCheckedChange,
                 onQuantityIncrease = onQuantityIncrease,
-                onQuantityDecrease = onQuantityDecrease
+                onQuantityDecrease = onQuantityDecrease,
+                onNavigateToProductDetails = onNavigateToProductDetails
             )
+
+
+
+            if(cartItem.price < 0.toBigDecimal()) {
+                Divider(
+                    color = Color.Gray,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 6.dp)
+                )
+                Text("Chương trình Flash Sale đã hết hạn", color = Color.Red, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+            }
         }
     }
 }

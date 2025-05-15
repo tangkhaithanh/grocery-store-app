@@ -8,5 +8,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface FlashSaleRepository {
     suspend fun getFlashSale(): Flow<Resource<List<FlashSaleResponse>>>
-
+    suspend fun getFlashSaleByFLI(id: Long) : Flow<Resource<FlashSaleResponse>>
 }

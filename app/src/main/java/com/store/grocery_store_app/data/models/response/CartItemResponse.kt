@@ -7,6 +7,6 @@ data class CartItemResponse(
     val id: Long?,
     val flashSaleId: Long?,
     val quantity:Int,
-    val price: BigDecimal,
+    var price: BigDecimal,
     val product: ProductResponse
 )

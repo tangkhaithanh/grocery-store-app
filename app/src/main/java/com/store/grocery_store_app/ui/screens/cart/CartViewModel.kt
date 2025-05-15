@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.store.grocery_store_app.data.models.FlashSaleStatusType
 import com.store.grocery_store_app.data.models.OrderItem
 import com.store.grocery_store_app.data.models.request.CartItemRequest
 import com.store.grocery_store_app.data.models.request.ProductSimpleRequest
@@ -12,6 +13,7 @@ import com.store.grocery_store_app.data.models.response.CartItemResponse
 import com.store.grocery_store_app.data.models.response.CartResponse
 import com.store.grocery_store_app.data.models.response.OrderResponse
 import com.store.grocery_store_app.data.repository.CartRepository
+import com.store.grocery_store_app.data.repository.FlashSaleRepository
 import com.store.grocery_store_app.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -34,7 +36,8 @@ data class CartState(
 )
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    private val cartRepository: CartRepository
+    private val cartRepository: CartRepository,
+    private val flashSaleRepository: FlashSaleRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CartState())
@@ -62,6 +65,21 @@ class CartViewModel @Inject constructor(
                         val items = result.data?.cartItems ?: emptyList()
                         // Cập nhật map checkbox mặc định là false
                         items.forEach { _itemCheckedMap[it.id ?: -1L] = false }
+                        items.forEach { item ->
+                            // Kiểm tra nếu item có flash_sale_item_id
+                            item.flashSaleId?.let { fliId -> // Sử dụng safe call và let
+                                // Gọi repository để lấy FlashSale
+                                // Trong ứng dụng thực tế, đây có thể là một suspend function nếu dùng coroutines
+                                flashSaleRepository.getFlashSaleByFLI(fliId).collect { fl ->
+                                    fl.data?.let { fs -> // Nếu tìm thấy FlashSale
+                                        if (fs.status == FlashSaleStatusType.ENDED) {
+                                            item.price = -1.0.toBigDecimal() // Cập nhật giá của item
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Log.d("FL", items.toString())
                         _state.update {
                             it.copy(
                                 carts = result.data,

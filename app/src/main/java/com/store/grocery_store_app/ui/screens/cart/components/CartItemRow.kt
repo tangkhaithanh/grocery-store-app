@@ -63,6 +63,7 @@ fun CartItemRow(
     onCheckedChange: (Boolean) -> Unit,
     onQuantityIncrease: () -> Unit,
     onQuantityDecrease: () -> Unit,
+    onNavigateToProductDetails: (Long) -> Unit
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -78,18 +79,52 @@ fun CartItemRow(
             onCheckedChange = onCheckedChange
         )
         if(cartItem.product.imageUrls.isNotEmpty()) {
-            AsyncImage(
-                model = cartItem.product.imageUrls[0],
-                contentDescription = null,
-                modifier = Modifier.size(56.dp)
-            )
+            if(cartItem.price < 0.toBigDecimal()) {
+                AsyncImage(
+                    model = cartItem.product.imageUrls[0],
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp)
+                        .background(Color(0xFFFAE3E0))
+                        .clickable {
+                            onNavigateToProductDetails(cartItem.product.id)
+                        }
+                )
+            }
+            else {
+                AsyncImage(
+                    model = cartItem.product.imageUrls[0],
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp)
+                        .clickable {
+                            onNavigateToProductDetails(cartItem.product.id)
+                        }
+                )
+            }
+
         }
         else {
-            AsyncImage(
-                model = "https://onelife.vn/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fsc_pcm_product%2Fprod%2F2023%2F12%2F15%2F19248-8936079121822.jpg&w=1920&q=75",
-                contentDescription = null,
-                modifier = Modifier.size(56.dp)
-            )
+            if(cartItem.price < 0.toBigDecimal()) {
+                AsyncImage(
+                    model = "https://onelife.vn/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fsc_pcm_product%2Fprod%2F2023%2F12%2F15%2F19248-8936079121822.jpg&w=1920&q=75",
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp)
+                        .background(Color(0xFFFAE3E0))
+                        .clickable {
+                            onNavigateToProductDetails(cartItem.product.id)
+                        }
+                )
+            }
+            else {
+                AsyncImage(
+                    model = "https://onelife.vn/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fsc_pcm_product%2Fprod%2F2023%2F12%2F15%2F19248-8936079121822.jpg&w=1920&q=75",
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp)
+                        .clickable {
+                            onNavigateToProductDetails(cartItem.product.id)
+                        }
+                )
+            }
+
         }
 
         Column(
@@ -113,15 +148,26 @@ fun CartItemRow(
                         )
                     }
                 }
-                QuantityPicker(
-                    quantity = quantity,
-                    quantityMax = cartItem.product.quantity-cartItem.product.soldCount,
-                    onQuantityChange = {
-                    quantity = it
-                },
-                    onQuantityIncrease = onQuantityIncrease,
-                    onQuantityDecrease = onQuantityDecrease,
-                )
+                if(cartItem.price >= 0.toBigDecimal()) {
+                    QuantityPicker(
+                        quantity = quantity,
+                        quantityMax = cartItem.product.quantity-cartItem.product.soldCount,
+                        onQuantityChange = {
+                            quantity = it
+                        },
+                        onQuantityIncrease = onQuantityIncrease,
+                        onQuantityDecrease = onQuantityDecrease,
+                    )
+                } else {
+                    QuantityPicker(
+                        quantity = quantity,
+                        quantityMax = cartItem.product.quantity-cartItem.product.soldCount,
+                        onQuantityChange = {},
+                        onQuantityIncrease = {},
+                        onQuantityDecrease = {},
+                    )
+                }
+
             }
         }
     }
@@ -149,7 +195,11 @@ fun QuantityPicker(
         modifier = Modifier
             .height(size)
             .width(size * 3)
-            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                RoundedCornerShape(8.dp)
+            )
     ) {
         IconButton(
             onClick = {
@@ -160,11 +210,17 @@ fun QuantityPicker(
         ) {
             Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(size * 0.5f))
         }
-        Divider(Modifier.width(1.dp).fillMaxHeight())
-        Box(modifier = Modifier.width(size).fillMaxHeight(), contentAlignment = Alignment.Center) {
+        Divider(Modifier
+            .width(1.dp)
+            .fillMaxHeight())
+        Box(modifier = Modifier
+            .width(size)
+            .fillMaxHeight(), contentAlignment = Alignment.Center) {
             Text(text = quantity.toString(), style = MaterialTheme.typography.titleMedium)
         }
-        Divider(Modifier.width(1.dp).fillMaxHeight())
+        Divider(Modifier
+            .width(1.dp)
+            .fillMaxHeight())
         IconButton(
             onClick = {
                 onQuantityChange((quantity + 1).coerceAtMost(quantityMax))
@@ -187,6 +243,7 @@ fun SwipeableCartItemRow(
     onCheckedChange: (Boolean) -> Unit,
     onQuantityIncrease: () -> Unit,
     onQuantityDecrease: () -> Unit,
+    onNavigateToProductDetails: (Long) -> Unit
 ) {
     var actionWidth by remember { mutableStateOf(0f) }
     val offsetX = remember { Animatable(0f) }
@@ -311,6 +368,7 @@ fun SwipeableCartItemRow(
                 onCheckedChange = onCheckedChange,
                 onQuantityIncrease = onQuantityIncrease,
                 onQuantityDecrease = onQuantityDecrease,
+                onNavigateToProductDetails = onNavigateToProductDetails
             )
         }
     }

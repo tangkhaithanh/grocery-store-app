@@ -154,6 +154,11 @@ interface ApiService {
     @GET("flash-sale")
     suspend fun getFlashSale() : Response<ApiResponse<List<FlashSaleResponse>>>
 
+    @GET("flash-sale/fli")
+    suspend fun getFlashSaleByFLI(
+        @Query("flash_sale_item_id") id:Long
+    ) : Response<ApiResponse<FlashSaleResponse>>
+
     // Address APIs (b? sung th�m t? code 2, d?t cu?i d? gi? nguy�n th? t? cu)
     @GET("address/get-all-addresses")
     suspend fun getAllAddresses(

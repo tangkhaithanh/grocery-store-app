@@ -52,7 +52,8 @@ fun CartScreen(
     onHome: () -> Unit,
     cartViewModel: CartViewModel = hiltViewModel(),
     onPayment: (List<Product>) -> Unit = {},
-    onNavigateVoucher: () -> Unit = {}
+    onNavigateVoucher: () -> Unit = {},
+    onNavigateToProductDetails: (Long) -> Unit = {}
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -211,9 +212,11 @@ fun CartScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
                                 onClick = {
+                                    var flag: Boolean = false;
                                     val selectedProducts = cartItems
                                         .filter { itemCheckedMap[it.id ?: -1L] == true }
                                         .map {
+                                            if(it.price < 0.toBigDecimal()) flag = true
                                             Log.d("CartItem Price: ", it.price.toInt().toString())
                                             Product(
                                                 id = it.product.id,
@@ -227,7 +230,10 @@ fun CartScreen(
                                                 quantity = it.quantity
                                             )
                                         }
-
+                                    if(flag) {
+                                        cartViewModel.showError("Sản phẩm Flash Sale của bạn đã quá hạn.")
+                                        return@Button
+                                    }
                                     if(selectedProducts.isEmpty()) {
                                         cartViewModel.showError("Vui lòng chọn sản phẩm trước khi thanh toán")
                                     }
@@ -306,7 +312,8 @@ fun CartScreen(
                         },
                         onRemove = {
                             if(item.id != null) cartViewModel.removeCartItem(item.id)
-                        }
+                        },
+                        onNavigateToProductDetails = onNavigateToProductDetails
                     )
                     Spacer(modifier = Modifier.height(5.dp))
                 }
