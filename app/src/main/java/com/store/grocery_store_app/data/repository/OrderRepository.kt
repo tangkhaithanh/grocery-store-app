@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface OrderRepository {
     suspend fun getOrders(page: Int = 0, size: Int = 20, typeStatusOrder: StatusOrderType): Flow<Resource<List<OrderResponse>>>
     suspend fun getOrder(orderId: Long): Flow<Resource<OrderResponse>>
+
     suspend fun cancelOrder(orderId: Long) : Flow<Resource<Boolean>>
     suspend fun createOrder(request: CreateOrderRequest): Flow<Resource<CreateOrderResponse>>
 }

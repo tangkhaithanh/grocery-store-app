@@ -35,6 +35,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- VNPay Return Deep Link -->
+            <intent-filter android:label="vnpay_return_intent"> <!-- Thêm label cho dễ debug -->
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Các giá trị scheme và host này sẽ được lấy từ gradle.properties -->
+                <data android:scheme="yourvnpayapp" android:host="vnpaymentreturn" />
+            </intent-filter>
         </activity>
     </application>
 

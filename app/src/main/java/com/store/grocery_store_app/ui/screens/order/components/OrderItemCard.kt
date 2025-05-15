@@ -157,8 +157,8 @@ fun OrderItemCard(
                     Button(
                         onClick = {
                             onNavigateToReviewProduct(
-                                orderItem.orderItemId.toLong(),
-                                orderItem.orderId.toLong()
+                                orderItem.orderId.toLong(),
+                                orderItem.orderItemId.toLong()
                             )
                         },
                         colors = ButtonDefaults.buttonColors(

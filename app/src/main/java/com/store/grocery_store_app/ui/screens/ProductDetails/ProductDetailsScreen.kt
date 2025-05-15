@@ -180,7 +180,7 @@ fun ProductDetailsScreen(
                 // Tùy chỉnh Snackbar ở đây nếu muốn
                 Snackbar(
                     snackbarData = snackbarData,
-                    containerColor = if (snackbarData.visuals.actionLabel == "Đóng") Color.Red else Color.Green,
+                    containerColor = if (snackbarData.visuals.actionLabel == "Đóng") Color.Red else Color(0xFF4CAF50),
                     contentColor = Color.White,
                     actionColor = MaterialTheme.colorScheme.primary // Ví dụ
                 )

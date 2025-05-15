@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.LiveData
 import com.store.grocery_store_app.ui.screens.address.SelectAddressScreen
+import com.store.grocery_store_app.ui.screens.vnpay.VnPayOnlyScreen
 
 /**
  * AuthNavGraph kết hợp logic của cả hai nhánh mà không còn conflict.
@@ -392,7 +393,18 @@ fun AuthNavGraph(
                         popUpTo(Screen.Voucher.route) { inclusive = true }
                     }
                 },
-                onOrderSuccess = { response ->
+                /*onNavigateAddAddress = {
+                    navController.navigate(Screen.AddAddress.route)
+                }*/
+                onNavigateVnPay = {
+                    navController.navigate(Screen.VnPay.route) {
+                        popUpTo(Screen.VnPay.route) { inclusive = true }
+                    }
+                }
+                /*onNavigateAddAddress = {
+                    navController.navigate(Screen.AddAddress.route)
+                }*/
+		onOrderSuccess = { response ->
                     // Navigate đến Order và clear back stack về Home
                     navController.navigate(Screen.Order.route) {
                         popUpTo(Screen.Home.route) {
@@ -401,6 +413,7 @@ fun AuthNavGraph(
                         launchSingleTop = true
                     }
                 }
+
             )
         }
 
@@ -518,6 +531,19 @@ fun AuthNavGraph(
                 deliveryOrder = selectedOrder,
                 onBackClicked = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route= Screen.VnPay.route) {
+            VnPayOnlyScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateOrder = {
+                    navController.navigate(Screen.Order.route) {
+                        popUpTo(Screen.Order.route) { inclusive = true }
+                    }
                 }
             )
         }

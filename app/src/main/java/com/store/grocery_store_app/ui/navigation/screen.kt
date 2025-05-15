@@ -111,4 +111,6 @@ sealed class Screen(val route: String) {
             return "deliveryDetail/$deliveryDetailId"
         }
     }
+
+    object VnPay : Screen("vnpay")
 }

@@ -2,6 +2,7 @@ package com.store.grocery_store_app.ui.screens.order
 
 import CategoryErrorView
 import EmptyCategoryView
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.store.grocery_store_app.data.models.OrderTab
 import com.store.grocery_store_app.data.models.StatusOrderType
 import com.store.grocery_store_app.data.models.response.OrderResponse
+import com.store.grocery_store_app.ui.components.SuccessDialog
 import com.store.grocery_store_app.ui.screens.order.components.OrderGroupCard
 import com.store.grocery_store_app.ui.screens.order.components.OrderItemCard
 import com.store.grocery_store_app.ui.theme.DeepTeal
@@ -64,6 +66,14 @@ fun OrderScreen(
     val orderItems = orderState.orderItems
     val orders = orderState.orders
 
+    if(orderState.isCancel){
+        SuccessDialog(
+            title = "Thành công",
+            content = "Bạn đã hủy đơn hàng thành công",
+            clearError = orderViewModel::clearError,
+            confirmButtonRequest = orderViewModel::clearError
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -122,7 +132,6 @@ fun OrderScreen(
                 orderItems.isNotEmpty() -> {
                     // Categories row with adjusted spacing
                     if (isDelivered) {
-
                         items(orderItems) { orderItem ->
                             OrderItemCard(
                                 orderItem = orderItem,
@@ -133,7 +142,8 @@ fun OrderScreen(
                     } else {
                         val grouped = groupOrders(orderItems)
                         items(grouped) { group ->
-                            OrderGroupCard(group, tabs[selectedTabIndex].title, onNavigateToProductDetails, onNavigateToDeliveryDetail)
+                            OrderGroupCard(group, tabs[selectedTabIndex].title, onNavigateToProductDetails, onNavigateToDeliveryDetail,
+                                onCancelOrder = orderViewModel::cancelOrder)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }

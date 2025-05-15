@@ -22,7 +22,8 @@ data class OrderState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isUpdateStatus : Boolean = false,
-    val selectedTabIndex: Int = 0
+    val selectedTabIndex: Int = 0,
+    val isCancel: Boolean = false
 )
 
 @HiltViewModel
@@ -98,6 +99,36 @@ class OrderViewModel @Inject constructor(
     }
 
     fun clearError() {
-        _state.update { it.copy(error = null) }
+        _state.update { it.copy(error = null, isCancel = false) }
+    }
+
+    fun cancelOrder(orderId: Long) {
+        viewModelScope.launch {
+            orderRepository.cancelOrder(orderId).collect{ result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        _state.update { it.copy(isLoading = true, error = null) }
+                    }
+                    is Resource.Success -> {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = null,
+                                isCancel = true
+                            )
+                        }
+                        loadOrders(StatusOrderType.PENDING)
+                    }
+                    is Resource.Error -> {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = result.message
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

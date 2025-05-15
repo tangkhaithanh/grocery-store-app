@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,22 +30,46 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.store.grocery_store_app.data.models.OrderGroup
+import com.store.grocery_store_app.data.models.StatusOrderType
 
 @Composable
 fun OrderGroupCard(
     group: OrderGroup,
     tab : String,
     onNavigateToProductDetails: (Long) -> Unit,
-    onNavigateToDeliveryDetail: (String) -> Unit = {}
+    onNavigateToDeliveryDetail: (String) -> Unit = {},
+    onCancelOrder: (Long) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
     val status = when (tab) {
-        "Chờ xác nhận" -> "Chờ thanh toán"
+        "Chờ xác nhận" -> "Chờ xác nhận"
         "Chờ lấy hàng" -> "Đang lấy hàng"
         "Chờ giao hàng" -> "Đang giao hàng"
         "Đã giao" -> "Hoàn thành"
         "Đã huỷ" -> "Đã huỷ"
         else -> "Không xác định"
+    }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    // Confirmation dialog for delete
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Xác nhận xóa") },
+            text = { Text("Bạn có chắc muốn hủy đơn hàng này?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onCancelOrder(group.orderId.toLong())
+                    showConfirmDialog = false
+                }) {
+                    Text("Xác nhận")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text("Hủy")
+                }
+            }
+        )
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -104,7 +129,7 @@ fun OrderGroupCard(
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 if(tab == "Chờ xác nhận") {
                     OutlinedButton(
-                        onClick = { },
+                        onClick = { showConfirmDialog = true },
                         border = BorderStroke(1.dp, Color.Red)
                     ) { Text("Hủy đơn hàng", style = TextStyle(color = Color.Red))}
                     Spacer(modifier = Modifier.width(8.dp))
