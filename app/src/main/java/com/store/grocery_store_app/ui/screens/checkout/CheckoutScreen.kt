@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +62,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.store.grocery_store_app.data.models.response.AddressDTO
+import com.store.grocery_store_app.data.models.response.CreateOrderResponse
 import com.store.grocery_store_app.data.models.response.VoucherResponse
+import com.store.grocery_store_app.ui.components.SuccessDialog
 import com.store.grocery_store_app.ui.screens.address.Address
 import java.text.NumberFormat
 import java.util.Locale
@@ -78,9 +81,9 @@ fun CheckoutScreen(
     selectedAddress: AddressDTO?,
     checkoutViewModel: CheckoutViewModel = hiltViewModel(),
     onBackClick: () -> Unit = {},
-    onPlaceOrderClick: () -> Unit = {},
     onNavigateAddress: () -> Unit = {},
-    onNavigateVoucher: () -> Unit = {}
+    onNavigateVoucher: () -> Unit = {},
+    onOrderSuccess: (CreateOrderResponse) -> Unit = {}
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -95,6 +98,15 @@ fun CheckoutScreen(
     val defaultAddress by checkoutViewModel.defaultAddress.collectAsState()
     val isLoading by checkoutViewModel.isLoading.collectAsState()
     val error by checkoutViewModel.error.collectAsState()
+    var selectedPaymentMethod by remember { mutableStateOf("") }
+    val orderSuccess by checkoutViewModel.orderSuccess.collectAsState()
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(orderSuccess) {
+        if (orderSuccess != null) {
+            showSuccessDialog = true
+        }
+    }
 
     // Sử dụng địa chỉ đã chọn nếu có, nếu không thì sử dụng địa chỉ mặc định
     val addressToDisplay = selectedAddress ?: defaultAddress
@@ -142,7 +154,47 @@ fun CheckoutScreen(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = onPlaceOrderClick,
+                        onClick = {
+                            // Validate trước khi đặt hàng
+                            when {
+                                addressToDisplay == null -> {
+                                    checkoutViewModel.showError("Vui lòng chọn địa chỉ giao hàng")
+                                    return@Button
+                                }
+
+                                selectedPaymentMethod.isEmpty() -> {
+                                    checkoutViewModel.showError("Vui lòng chọn phương thức thanh toán")
+                                    return@Button
+                                }
+
+                                products.isEmpty() -> {
+                                    checkoutViewModel.showError("Không có sản phẩm trong đơn hàng")
+                                    return@Button
+                                }
+
+                                else -> {
+                                    // Tất cả validation đã pass, xử lý theo payment method
+                                    when (selectedPaymentMethod) {
+                                        "COD" -> {
+                                            // Thanh toán tiền mặt - tạo order trực tiếp
+                                            checkoutViewModel.createOrder(
+                                                products = products,
+                                                selectedAddress = addressToDisplay,
+                                                voucher = voucher,
+                                                paymentMethod = selectedPaymentMethod
+                                            )
+                                        }
+                                        "VNPay" -> {
+                                            // TODO: Xử lý thanh toán VNPay
+                                            //checkoutViewModel.showError("VNPay payment chưa được implement")
+                                        }
+                                        else -> {
+                                            checkoutViewModel.showError("Phương thức thanh toán không hợp lệ")
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -305,23 +357,32 @@ fun CheckoutScreen(
                     Column(modifier = Modifier.padding(12.dp)) {
                         SectionTitle("Phương thức thanh toán")
                         val paymentMethods = listOf("VNPay", "COD")
-                        var selected by remember { mutableStateOf(paymentMethods[0]) }
                         paymentMethods.forEach { method ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { selected = method }
+                                    .clickable { selectedPaymentMethod = method }  // Sử dụng selectedPaymentMethod
                                     .padding(vertical = 4.dp)
                             ) {
                                 RadioButton(
-                                    selected = (method == selected),
-                                    onClick = { selected = method },
+                                    selected = (method == selectedPaymentMethod),  // Sử dụng selectedPaymentMethod
+                                    onClick = { selectedPaymentMethod = method },   // Sử dụng selectedPaymentMethod
                                     colors = RadioButtonDefaults.colors(selectedColor = DeepTeal)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(method, color = DeepTeal)
                             }
+                        }
+
+                        // Hiển thị message nếu chưa chọn payment method
+                        if (selectedPaymentMethod.isEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "* Vui lòng chọn phương thức thanh toán",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
@@ -352,6 +413,28 @@ fun CheckoutScreen(
                     }
                 }
             }
+        }
+        if (showSuccessDialog && orderSuccess != null) {
+            SuccessDialog(
+                title = "Đặt hàng thành công!",
+                content = "Mã đơn hàng: #${orderSuccess!!.orderId}\nTổng tiền: ${
+                    NumberFormat.getCurrencyInstance(Locale("vi", "VN"))
+                        .format(orderSuccess!!.totalAmount)
+                }",
+                onDismissRequest = {
+                    showSuccessDialog = false
+                    checkoutViewModel.clearOrderSuccess()
+                },
+                confirmButtonRequest = {
+                    showSuccessDialog = false
+                    onOrderSuccess(orderSuccess!!)
+                    checkoutViewModel.clearOrderSuccess()
+                },
+                clearError = {
+                    showSuccessDialog = false
+                    checkoutViewModel.clearOrderSuccess()
+                }
+            )
         }
     }
 }
@@ -425,7 +508,8 @@ data class Product(
     val name: String,
     val price: Int,
     val quantity: Int,
-    val imageUrl : String
+    val imageUrl : String,
+    val flashSaleItemId: Long? = null // Add this field
 )
 
 

@@ -3,6 +3,8 @@ package com.store.grocery_store_app.data.repository.impl
 import android.util.Log
 import com.store.grocery_store_app.data.api.ApiService
 import com.store.grocery_store_app.data.models.StatusOrderType
+import com.store.grocery_store_app.data.models.request.CreateOrderRequest
+import com.store.grocery_store_app.data.models.response.CreateOrderResponse
 import com.store.grocery_store_app.data.models.response.OrderResponse
 import com.store.grocery_store_app.data.repository.OrderRepository
 import com.store.grocery_store_app.utils.Resource
@@ -73,4 +75,27 @@ class OrderRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun createOrder(request: CreateOrderRequest): Flow<Resource<CreateOrderResponse>> = flow {
+        emit(Resource.Loading())
+        try {
+            val response = apiService.createOrder(request)
+            if (response.isSuccessful) {
+                response.body()?.let { apiResponse ->
+                    if (apiResponse.success && apiResponse.data != null) {
+                        emit(Resource.Success(apiResponse.data))
+                    } else {
+                        emit(Resource.Error(apiResponse.message))
+                    }
+                } ?: emit(Resource.Error("Phản hồi rỗng từ server"))
+            } else {
+                emit(Resource.Error("Đặt hàng thất bại: ${response.message()}"))
+            }
+        } catch (e: HttpException) {
+            emit(Resource.Error("Lỗi HTTP: ${e.message()}"))
+        } catch (e: IOException) {
+            emit(Resource.Error("Không thể kết nối đến máy chủ"))
+        } catch (e: Exception) {
+            emit(Resource.Error("Lỗi không xác định: ${e.message}"))
+        }
+    }
 }
