@@ -123,7 +123,7 @@ fun OrderItemCard(
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                "Tổng số tiền (${orderItem.quantity} sản phẩm): ₫${orderItem.totalAmount}",
+                "Tổng số tiền (${orderItem.quantity} sản phẩm): ${currencyFormatter.format(orderItem.totalAmount)}",
                 modifier = Modifier.align(Alignment.End),
                 fontWeight = FontWeight.SemiBold
             )

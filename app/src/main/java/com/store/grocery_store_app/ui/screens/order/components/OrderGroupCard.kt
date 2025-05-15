@@ -31,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.store.grocery_store_app.data.models.OrderGroup
 import com.store.grocery_store_app.data.models.StatusOrderType
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun OrderGroupCard(
@@ -70,6 +72,9 @@ fun OrderGroupCard(
                 }
             }
         )
+    }
+    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
+        maximumFractionDigits = 0
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -120,7 +125,7 @@ fun OrderGroupCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                "Tổng số tiền (${group.items.sumOf { it.quantity }} sản phẩm): ₫${group.totalAmount}",
+                "Tổng số tiền (${group.items.sumOf { it.quantity }} sản phẩm): ${currencyFormatter.format(group.totalAmount)}",
                 modifier = Modifier.align(Alignment.End),
                 fontWeight = FontWeight.SemiBold
             )
