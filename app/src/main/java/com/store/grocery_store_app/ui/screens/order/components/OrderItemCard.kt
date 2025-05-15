@@ -41,10 +41,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.store.grocery_store_app.R
 import com.store.grocery_store_app.data.models.OrderItem
+import com.store.grocery_store_app.ui.screens.cart.CartViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -54,6 +56,7 @@ import java.util.Locale
 fun OrderItemCard(
     orderItem: OrderItem,
     onNavigateToReviewProduct: (Long,Long) -> Unit,
+    onNavigateToProduct: (Long) -> Unit,
     ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -137,7 +140,9 @@ fun OrderItemCard(
                     if(orderItem.reviewed==true) {
                         // Nút: Xem đánh giá
                         OutlinedButton(
-                            onClick = { /* TODO: Review */ },
+                            onClick = {
+                                onNavigateToProduct(orderItem.productId)
+                            },
                         ) {
                             Text("Xem đánh giá")
                         }
@@ -148,7 +153,9 @@ fun OrderItemCard(
 
                     // Nút: Mua lại
                     Button(
-                        onClick = { /* TODO: Buy again */ }
+                        onClick = {
+                            onNavigateToProduct(orderItem.productId)
+                        }
                     ) {
                         Text("Mua lại")
                     }

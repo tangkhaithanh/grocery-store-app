@@ -1,6 +1,7 @@
 package com.store.grocery_store_app.ui.screens.cart
 
 import EmptyCategoryView
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -46,6 +50,7 @@ import java.math.RoundingMode
 import java.text.NumberFormat
 import java.util.Locale
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
@@ -62,7 +67,7 @@ fun CartScreen(
     val cartItems = state.cartItems
     val isCartChecked = cartViewModel.isCartChecked.value
     val itemCheckedMap = cartViewModel.itemCheckedMap
-
+    var isInitiallySwiped by mutableStateOf(false)
     val totalPrice = cartItems
         .filter { itemCheckedMap[it.id ?: -1L] == true }
         .sumOf { it.price.toInt() * it.quantity }
@@ -90,7 +95,9 @@ fun CartScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO: Edit action */ }) {
+                    IconButton(onClick = {
+                        isInitiallySwiped = !isInitiallySwiped
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit",
@@ -290,6 +297,7 @@ fun CartScreen(
                     CartItemCard(
                         item,
                         checked = checked,
+                        isInitiallySwiped = isInitiallySwiped,
                         onCheckedChange = { isChecked ->
                             cartViewModel.updateItemChecked(item.id, isChecked)
                         },

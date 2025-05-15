@@ -32,6 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.store.grocery_store_app.data.models.response.AddressDTO
+import com.store.grocery_store_app.data.models.response.VoucherResponse
+import com.store.grocery_store_app.ui.screens.checkout.CheckoutViewModel
+import com.store.grocery_store_app.ui.screens.checkout.Product
 import com.store.grocery_store_app.utils.VnPayConstants
 import java.text.NumberFormat
 import java.util.Locale
@@ -40,8 +44,12 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VnPayOnlyScreen(
-    totalAmount: Long = 1,
+    totalAmount: Long = 0,
+    products: List<Product>,
+    address : AddressDTO?,
+    voucher: VoucherResponse?,
     viewModel: VnPayOnlyViewModel = hiltViewModel(),
+    checkOutViewModel: CheckoutViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateOrder: () -> Unit = {}
 ) {
@@ -138,7 +146,16 @@ fun VnPayOnlyScreen(
                             message = state.message,
                             details = listOf("Mã giao dịch: ${state.txnRef}"),
                             buttonText = "Tuyệt vời!\n Đóng",
-                            onButtonClick = { viewModel.resetPaymentState(); onNavigateOrder() }
+                            onButtonClick = {
+                                viewModel.resetPaymentState();
+                                onNavigateOrder();
+                                checkOutViewModel.createOrder(
+                                    products = products,
+                                    selectedAddress = address,
+                                    voucher = voucher,
+                                    paymentMethod = "VNPay"
+                                )
+                            }
                         )
                     }
                     is VnPayPaymentState.PaymentFailed -> {

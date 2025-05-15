@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.store.grocery_store_app.data.models.response.ProductResponse
+import com.store.grocery_store_app.ui.components.SuccessDialog
 import com.store.grocery_store_app.ui.screens.FavoriteProduct.FavoriteProductViewModel
 import com.store.grocery_store_app.ui.screens.FlashSale.FlashSaleSection
 import com.store.grocery_store_app.ui.screens.auth.AuthViewModel
@@ -56,7 +57,18 @@ fun HomeScreen(
             cartViewModel.getAllCartItem()
             favouriteViewModel.loadFavouriteProducts()
             productViewModel.loadFlashSale()
+            cartViewModel.onHideSuccess()
         }
+    }
+    if(cartState.isSuccessInsert) {
+        SuccessDialog(
+            title = "Thành công",
+            content = "Thêm vào giỏ hàng thành công",
+            clearError = cartViewModel::clearError,
+            onDismissRequest = cartViewModel::onHideSuccess,
+            confirmButtonRequest = cartViewModel::onHideSuccess
+        )
+        cartViewModel.getAllCartItem()
     }
 
     Scaffold(
@@ -72,6 +84,7 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -136,7 +149,20 @@ fun HomeScreen(
                                 onNavigateToProductDetails(productId)
                             },
                             onAddToCartClick = { product ->
-                                // Handle add to cart (could be implemented with CartViewModel)
+                                var img : String? = null
+                                if(product.imageUrls.isNotEmpty()) {
+                                    img = product.imageUrls.get(0)
+                                }
+                                cartViewModel.insertProductIntoCart(
+                                    idCart = null,
+                                    flashSaleId = null,
+                                    quantity = 1,
+                                    priceCart = product.effectivePrice,
+                                    idProduct = product.id,
+                                    name = product.name,
+                                    priceProduct = product.price,
+                                    imageUrl = img
+                                )
                             }
                         )
                     }
@@ -153,7 +179,20 @@ fun HomeScreen(
                         onNavigateToProductDetails(productId)
                     },
                     onAddToCartClick = { product ->
-                        // Handle add to cart (could be implemented with CartViewModel)
+                        var img : String? = null
+                        if(product.imageUrls.isNotEmpty()) {
+                            img = product.imageUrls.get(0)
+                        }
+                        cartViewModel.insertProductIntoCart(
+                            idCart = null,
+                            flashSaleId = null,
+                            quantity = 1,
+                            priceCart = product.effectivePrice,
+                            idProduct = product.id,
+                            name = product.name,
+                            priceProduct = product.price,
+                            imageUrl = img
+                        )
                     }
                 )
 
@@ -169,7 +208,20 @@ fun HomeScreen(
                         onNavigateToProductDetails(productId)
                     },
                     onAddToCartClick = { product ->
-                        // Handle add to cart (could be implemented with CartViewModel)
+                        var img : String? = null
+                        if(product.imageUrls.isNotEmpty()) {
+                            img = product.imageUrls.get(0)
+                        }
+                        cartViewModel.insertProductIntoCart(
+                            idCart = null,
+                            flashSaleId = null,
+                            quantity = 1,
+                            priceCart = product.effectivePrice,
+                            idProduct = product.id,
+                            name = product.name,
+                            priceProduct = product.price,
+                            imageUrl = img
+                        )
                     }
                 )
 

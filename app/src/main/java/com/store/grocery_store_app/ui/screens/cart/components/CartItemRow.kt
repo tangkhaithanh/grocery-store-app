@@ -238,6 +238,7 @@ fun QuantityPicker(
 fun SwipeableCartItemRow(
     cartItem: CartItemResponse,
     checked: Boolean = false,
+    isInitiallySwiped: Boolean = false,
     onDelete: (Long) -> Unit,
     onShowSimilar: () -> Unit,
     onCheckedChange: (Boolean) -> Unit,
@@ -252,6 +253,19 @@ fun SwipeableCartItemRow(
     // Pre-calc gap in px
     val gapPx = with(LocalDensity.current) { 12.dp.toPx() }
     var showConfirmDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = isInitiallySwiped, key2 = actionWidth) {
+        if (isInitiallySwiped && actionWidth > 0f && !isExpanded) { // Chỉ swipe nếu được yêu cầu, actionWidth đã có và chưa swipe
+            scope.launch {
+                offsetX.animateTo(-actionWidth, tween(300))
+                isExpanded = true
+            }
+        } else if (!isInitiallySwiped && isExpanded) { // Nếu isInitiallySwiped = false và đang swipe, đóng lại
+            scope.launch {
+                offsetX.animateTo(0f, tween(300))
+                isExpanded = false
+            }
+        }
+    }
     // Confirmation dialog for delete
     if (showConfirmDialog) {
         AlertDialog(
@@ -324,19 +338,6 @@ fun SwipeableCartItemRow(
                     },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    Modifier
-                        .fillMaxHeight()
-                        .width(80.dp)
-                        .background(Color(0xFFFF9800)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    TextButton(onClick = onShowSimilar) {
-                        Text("Yêu thích", textAlign = TextAlign.Center,
-                            color = Color.White
-                        )
-                    }
-                }
                 Box(
                     Modifier
                         .fillMaxHeight()

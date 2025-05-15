@@ -393,10 +393,14 @@ fun AuthNavGraph(
                         popUpTo(Screen.Voucher.route) { inclusive = true }
                     }
                 },
-                onNavigateVnPay = {
-                    navController.navigate(Screen.VnPay.route) {
-                        popUpTo(Screen.VnPay.route) { inclusive = true }
+                onNavigateVnPay = { totalAmount, products, selectedAddress, voucher ->
+                    val productJson = Uri.encode(Gson().toJson(products))
+                    val addressJson = Uri.encode(Gson().toJson(selectedAddress))
+                    var voucherJson = Uri.encode(Gson().toJson(voucher))
+                    if(voucherJson == "null") {
+                        voucherJson = "null_voucher"
                     }
+                    navController.navigate(Screen.VnPay.createRoute(totalAmount, productJson, addressJson, voucherJson))
                 },
                 onOrderSuccess = { response ->
                     // Navigate đến Order và clear back stack về Home
@@ -528,8 +532,40 @@ fun AuthNavGraph(
             )
         }
 
-        composable(route= Screen.VnPay.route) {
+        composable(
+            route= Screen.VnPay.route,
+            arguments = listOf(
+                navArgument("totalAmount") { type = NavType.LongType },
+                navArgument("productJson") { type = NavType.StringType },
+                navArgument("addressJson") { type = NavType.StringType },
+                navArgument("voucherJson") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val totalAmount = backStackEntry.arguments?.getLong("totalAmount") ?: 0L
+            val productJson = backStackEntry.arguments?.getString("productJson") ?: ""
+            val addressJson = backStackEntry.arguments?.getString("addressJson") ?: ""
+            val voucherJson = backStackEntry.arguments?.getString("voucherJson")
+
+            val products = try {
+                Gson().fromJson(productJson, Array<Product>::class.java).toList()
+            } catch (e: Exception) {
+                emptyList()
+            }
+            val address = try {
+                Gson().fromJson(addressJson, AddressDTO::class.java)
+            } catch (e: Exception) {
+                null
+            }
+            val voucher = try {
+                Gson().fromJson(voucherJson, VoucherResponse::class.java)
+            } catch (e: Exception) {
+                null
+            }
             VnPayOnlyScreen(
+                totalAmount = totalAmount,
+                products = products,
+                address = address,
+                voucher = voucher,
                 onNavigateBack = {
                     navController.popBackStack()
                 },

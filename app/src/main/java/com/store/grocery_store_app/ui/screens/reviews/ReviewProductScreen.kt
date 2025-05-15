@@ -262,34 +262,34 @@ fun ReviewProductScreen(
             )
 
             // Hiển thị tên người dùng
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f) // Chiếm phần lớn không gian
-                        .padding(end = 8.dp)
-                ) {
-                    Text("Hiển thị tên người đăng nhập", style = MaterialTheme.typography.labelLarge)
-                    Text(
-                        text = if (showUserName)
-                            "Tên tài khoản của bạn sẽ hiển thị như ABCXYZZ"
-                        else
-                            "Ẩn tên người đăng nhập trên đánh giá này",
-                        maxLines = 2,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                Switch(
-                    checked = showUserName,
-                    onCheckedChange = { showUserName = it }
-                )
-            }
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(top = 8.dp)
+//            ) {
+//                Column(
+//                    modifier = Modifier
+//                        .weight(1f) // Chiếm phần lớn không gian
+//                        .padding(end = 8.dp)
+//                ) {
+//                    Text("Hiển thị tên người đăng nhập", style = MaterialTheme.typography.labelLarge)
+//                    Text(
+//                        text = if (showUserName)
+//                            "Tên tài khoản của bạn sẽ hiển thị như ABCXYZZ"
+//                        else
+//                            "Ẩn tên người đăng nhập trên đánh giá này",
+//                        maxLines = 2,
+//                        style = MaterialTheme.typography.bodySmall
+//                    )
+//                }
+//
+//                Switch(
+//                    checked = showUserName,
+//                    onCheckedChange = { showUserName = it }
+//                )
+//            }
         }
         // Hiển thị hộp thoại thành công khi tạo đánh giá thành công
         if (state.isReviewed) {

@@ -64,6 +64,7 @@ import coil.compose.AsyncImage
 import com.store.grocery_store_app.data.models.response.AddressDTO
 import com.store.grocery_store_app.data.models.response.CreateOrderResponse
 import com.store.grocery_store_app.data.models.response.VoucherResponse
+import com.store.grocery_store_app.ui.components.ErrorDialog
 import com.store.grocery_store_app.ui.components.SuccessDialog
 import com.store.grocery_store_app.ui.screens.address.Address
 import java.text.NumberFormat
@@ -83,7 +84,7 @@ fun CheckoutScreen(
     onBackClick: () -> Unit = {},
     onNavigateAddress: () -> Unit = {},
     onNavigateVoucher: () -> Unit = {},
-    onNavigateVnPay: () -> Unit = {},
+    onNavigateVnPay: (Long, List<Product>, selectedAddress: AddressDTO?, voucher: VoucherResponse?) -> Unit,
     onOrderSuccess: (CreateOrderResponse) -> Unit = {}
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
@@ -148,7 +149,7 @@ fun CheckoutScreen(
                             color = DeepTeal
                         )
                         Text(
-                            text = "${totalPayment}đ",
+                            text = currencyFormatter.format(totalPayment),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = DeepTeal
                         )
@@ -187,7 +188,12 @@ fun CheckoutScreen(
                                         }
                                         "VNPay" -> {
                                             // TODO: Xử lý thanh toán VNPay
-                                            onNavigateVnPay()
+                                            onNavigateVnPay(
+                                                totalPayment.toLong(),
+                                                products,
+                                                addressToDisplay,
+                                                voucher
+                                            )
                                         }
                                         else -> {
                                             checkoutViewModel.showError("Phương thức thanh toán không hợp lệ")
@@ -439,6 +445,13 @@ fun CheckoutScreen(
                 }
             )
         }
+        if(error != null) {
+            ErrorDialog(
+                title = "Lỗi",
+                content = error!!,
+                clearError = checkoutViewModel::clearError
+            )
+        }
     }
 }
 
@@ -499,7 +512,7 @@ fun ProductItem(product: Product) {
         Column(modifier = Modifier.weight(1f)) {
             Text(product.name, fontWeight = FontWeight.Medium, color = DeepTeal)
             Text("x${product.quantity}", color = DeepTeal, fontSize = 13.sp)
-            Text(product.price.toString(), color = DeepTeal, fontSize = 13.sp)
+            Text(currencyFormatter.format(product.price), color = DeepTeal, fontSize = 13.sp)
         }
         Text(currencyFormatter.format(product.price * product.quantity), color = DeepTeal)
     }

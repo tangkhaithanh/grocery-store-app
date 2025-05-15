@@ -33,7 +33,8 @@ fun CartItemCard(
     onRemove:(Long) -> Unit,
     onQuantityIncrease: () -> Unit,
     onQuantityDecrease: () -> Unit,
-    onNavigateToProductDetails: (Long) -> Unit
+    onNavigateToProductDetails: (Long) -> Unit,
+    isInitiallySwiped: Boolean = false,
 ) {
     var color = Color.White
     if(cartItem.price < 0.toBigDecimal()) {
@@ -68,7 +69,6 @@ fun CartItemCard(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Grocery", fontWeight = FontWeight.SemiBold)
                 }
-                Text("Sửa", color = Color.Black, modifier = Modifier.alpha(0.5f), fontSize = 10.sp)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -76,6 +76,7 @@ fun CartItemCard(
             SwipeableCartItemRow(
                 cartItem = cartItem,
                 checked = checked,
+                isInitiallySwiped = isInitiallySwiped,
                 onDelete = onRemove,
                 onShowSimilar = {},
                 onCheckedChange = onCheckedChange,

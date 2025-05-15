@@ -50,7 +50,7 @@ fun OrderScreen(
     onHome: () -> Unit,
     onNavigateToReviewProduct: (Long, Long) -> Unit,
     onNavigateToProductDetails: (Long) -> Unit,
-    onNavigateToDeliveryDetail: (String) -> Unit
+    onNavigateToDeliveryDetail: (String) -> Unit,
 ) {
     val orderState by orderViewModel.state.collectAsState()
     val isLoading = orderState.isLoading
@@ -135,7 +135,8 @@ fun OrderScreen(
                         items(orderItems) { orderItem ->
                             OrderItemCard(
                                 orderItem = orderItem,
-                                onNavigateToReviewProduct
+                                onNavigateToReviewProduct,
+                                onNavigateToProductDetails,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }

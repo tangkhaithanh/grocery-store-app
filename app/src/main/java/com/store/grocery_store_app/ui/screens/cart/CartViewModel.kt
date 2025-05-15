@@ -31,7 +31,8 @@ data class CartState(
     val cartItems: List<CartItemResponse> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isSuccess: Boolean = false,
+    val isSuccessGet: Boolean = false,
+    val isSuccessInsert: Boolean  = false,
     val isRemove: Boolean = false
 )
 @HiltViewModel
@@ -84,7 +85,7 @@ class CartViewModel @Inject constructor(
                             it.copy(
                                 carts = result.data,
                                 cartItems = items,
-                                isSuccess = true,
+                                isSuccessGet = true,
                                 isLoading = false,
                                 error = null
                             )
@@ -126,7 +127,7 @@ class CartViewModel @Inject constructor(
                     is Resource.Success -> {
                         _state.update {
                             it.copy(
-                                isSuccess = true,
+                                isSuccessInsert = true,
                                 isLoading = false,
                                 error = null
                             )
@@ -198,7 +199,6 @@ class CartViewModel @Inject constructor(
                                 isRemove = true,
                                 isLoading = false,
                                 error = null,
-                                isSuccess = false
                             )
                         }
                     }
@@ -215,7 +215,7 @@ class CartViewModel @Inject constructor(
 
     }
     fun onHideSuccess() {
-        _state.update { it.copy(isRemove = false, isSuccess = false) }
+        _state.update { it.copy(isRemove = false, isSuccessInsert = false, isSuccessGet = false) }
     }
     // --- START: Hàm cập nhật số lượng với Debounce ---
     fun updateCartItemQuantity(cartItemId: Long, newQuantity: Int, productId: Long) {
@@ -280,7 +280,8 @@ class CartViewModel @Inject constructor(
 
     fun clearSuccessFlag() {
         _state.update { it.copy(
-            isSuccess = false
+            isSuccessGet = false,
+            isSuccessInsert = false
         ) }
     }
     // --- END: Thêm để dọn dẹp Job khi ViewModel bị hủy ---

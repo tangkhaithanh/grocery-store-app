@@ -80,8 +80,8 @@ fun ProductDetailsScreen(
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
     }
-    LaunchedEffect(cartState.isSuccess) {
-        if (cartState.isSuccess) {
+    LaunchedEffect(cartState.isSuccessInsert) {
+        if (cartState.isSuccessInsert) {
             scope.launch { // Sử dụng scope đã nhớ
                 val result = snackbarHostState.showSnackbar(
                     message = "Sản phẩm đã được thêm vào giỏ hàng",

@@ -112,5 +112,9 @@ sealed class Screen(val route: String) {
         }
     }
 
-    object VnPay : Screen("vnpay")
+    object VnPay : Screen("vnpay/{totalAmount}/{productJson}/{addressJson}/{voucherJson}") {
+        fun createRoute(totalAmount: Long, productJson: String, addressJson: String, voucherJson: String): String {
+            return "vnpay/$totalAmount/$productJson/$addressJson/$voucherJson"
+        }
+    }
 }
