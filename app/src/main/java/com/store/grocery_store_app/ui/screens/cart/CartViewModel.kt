@@ -231,43 +231,53 @@ class CartViewModel @Inject constructor(
             currentState.copy(cartItems = updatedItems)
         }
 
-        // 2. Hủy bỏ job debounce cũ nếu có cho cartItemId này
+        // 1. Hủy bỏ job debounce cũ nếu có
         updateQuantityDebounceJobs[cartItemId]?.cancel()
 
-        // 3. Tạo job debounce mới
+        // 2. Tạo job debounce mới
         updateQuantityDebounceJobs[cartItemId] = viewModelScope.launch {
             delay(debounceDelayMillis)
 
-            // Sau khi delay, thực hiện gọi API
-            Log.d("CartViewModel_UpdateQuantity", "Debounced: Gọi API để cập nhật cartItem $cartItemId với số lượng $newQuantity")
-            val cartItemRequest:CartItemRequest = CartItemRequest(
+            val currentItem = _state.value.cartItems.find { it.id == cartItemId }
+
+            if (currentItem == null) {
+                Log.e("CartViewModel", "Không tìm thấy cartItem với ID = $cartItemId")
+                return@launch
+            }
+
+            // 3. Tạo request từ dữ liệu hiện tại
+            val cartItemRequest = CartItemRequest(
                 id = cartItemId,
                 quantity = newQuantity,
-                flashSaleId = null,
-                price = 0.0.toBigDecimal(),
+                flashSaleId = currentItem.flashSaleId,  // ✅ giữ lại flash sale ID nếu có
+                price = currentItem.price,              // ✅ giữ lại đúng giá
                 product = ProductSimpleRequest(
-                    id = productId,
-                    name = "",
-                    price = BigDecimal.ZERO,
-                    imageUrl = ""
+                    id = currentItem.product?.id ?: 0L,
+                    name = currentItem.product?.name ?: "",
+                    price = currentItem.product?.price ?: BigDecimal.ZERO,
+                    imageUrl = ""//currentItem.product?.imageUrl
                 )
             )
-             cartRepository.updateProductIntoCart(cartItemRequest).collect { result ->
-                 when (result) {
-                     is Resource.Loading -> {
-                         _state.update { it.copy(isLoading = true) } // Có thể hiển thị loading nếu muốn
-                     }
-                     is Resource.Success -> {
-                         Log.d("CartViewModel_UpdateQuantity", "API Success: Cập nhật thành công cartItem $cartItemId")
-                         getAllCartItem()
-                         _state.update { it.copy(isLoading = false, error = null) }
-                     }
-                     is Resource.Error -> {
-                         Log.e("CartViewModel_UpdateQuantity", "API Error: Lỗi cập nhật cartItem $cartItemId - ${result.message}")
-                         _state.update { it.copy(isLoading = false, error = result.message ?: "Lỗi cập nhật số lượng") }
-                     }
-                 }
-             }
+
+            Log.d("CartViewModel_UpdateQuantity", "Debounced: Gửi request cập nhật cartItem: $cartItemRequest")
+
+            cartRepository.updateProductIntoCart(cartItemRequest).collect { result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        _state.update { it.copy(isLoading = true) }
+                    }
+                    is Resource.Success -> {
+                        Log.d("CartViewModel_UpdateQuantity", "API thành công: Đã cập nhật cartItem $cartItemId")
+                        getAllCartItem()
+                        _state.update { it.copy(isLoading = false, error = null) }
+                    }
+                    is Resource.Error -> {
+                        Log.e("CartViewModel_UpdateQuantity", "API lỗi: ${result.message}")
+                        _state.update { it.copy(isLoading = false, error = result.message ?: "Lỗi khi cập nhật") }
+                    }
+                }
+            }
+
             updateQuantityDebounceJobs.remove(cartItemId)
         }
     }

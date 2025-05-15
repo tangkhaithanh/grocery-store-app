@@ -140,20 +140,6 @@ fun AddAddressScreen(
                 errorMessage = addressState.streetAddressError ?: ""
             )
 
-            // Default Address Checkbox
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = addressState.formIsDefault,
-                    onCheckedChange = { addressViewModel.updateFormIsDefault(it) },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-            }
-
             // Error message if any
             if (addressState.error != null) {
                 Card(
