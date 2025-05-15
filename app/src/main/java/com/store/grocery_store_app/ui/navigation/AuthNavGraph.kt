@@ -393,18 +393,12 @@ fun AuthNavGraph(
                         popUpTo(Screen.Voucher.route) { inclusive = true }
                     }
                 },
-                /*onNavigateAddAddress = {
-                    navController.navigate(Screen.AddAddress.route)
-                }*/
                 onNavigateVnPay = {
                     navController.navigate(Screen.VnPay.route) {
                         popUpTo(Screen.VnPay.route) { inclusive = true }
                     }
-                }
-                /*onNavigateAddAddress = {
-                    navController.navigate(Screen.AddAddress.route)
-                }*/
-		onOrderSuccess = { response ->
+                },
+                onOrderSuccess = { response ->
                     // Navigate đến Order và clear back stack về Home
                     navController.navigate(Screen.Order.route) {
                         popUpTo(Screen.Home.route) {
@@ -413,7 +407,6 @@ fun AuthNavGraph(
                         launchSingleTop = true
                     }
                 }
-
             )
         }
 

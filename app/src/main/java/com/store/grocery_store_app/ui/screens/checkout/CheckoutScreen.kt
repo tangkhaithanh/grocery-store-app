@@ -155,7 +155,6 @@ fun CheckoutScreen(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = onPlaceOrderClick,
                         onClick = {
                             // Validate trước khi đặt hàng
                             when {
@@ -370,8 +369,6 @@ fun CheckoutScreen(
                                     .padding(vertical = 4.dp)
                             ) {
                                 RadioButton(
-                                    selected = (method == selected),
-                                    onClick = { selected = method },
                                     selected = (method == selectedPaymentMethod),  // Sử dụng selectedPaymentMethod
                                     onClick = { selectedPaymentMethod = method },   // Sử dụng selectedPaymentMethod
                                     colors = RadioButtonDefaults.colors(selectedColor = DeepTeal)
@@ -514,7 +511,6 @@ data class Product(
     val name: String,
     val price: Int,
     val quantity: Int,
-    val imageUrl : String
     val imageUrl : String,
     val flashSaleItemId: Long? = null // Add this field
 )
