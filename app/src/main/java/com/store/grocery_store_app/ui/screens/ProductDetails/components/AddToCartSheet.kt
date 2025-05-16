@@ -137,7 +137,7 @@ fun AddToCartSheet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     AsyncImage(
-                        model = product.imageUrls,
+                        model = product.imageUrls[0],
                         contentDescription = "Product Image",
                         modifier = Modifier
                             .size(80.dp)

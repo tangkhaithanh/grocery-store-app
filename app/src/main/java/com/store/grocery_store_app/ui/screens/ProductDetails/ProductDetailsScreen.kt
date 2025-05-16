@@ -76,6 +76,7 @@ fun ProductDetailsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope() // Dùng scope này cho LaunchedEffect
 
+
     // Currency formatter for Vietnamese Dong
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("vi", "VN")).apply {
         maximumFractionDigits = 0
@@ -105,6 +106,7 @@ fun ProductDetailsScreen(
         viewModel.loadProductDetails(productId)
         reviewViewModel.loadProductReviews(productId, true)
         reviewViewModel.loadReviewStats(productId)  // Gọi API để lấy thống kê đánh giá
+        cartViewModel.getAllCartItem()
     }
     // Function to handle animation completion
     fun onAnimationComplete() {
@@ -128,7 +130,7 @@ fun ProductDetailsScreen(
                 onNavigateBack = onNavigateBack,
                 onToggleFavorite = { viewModel.toggleFavorite() },
                 onCartClick = onNavigateToCart, // Thêm xử lý sự kiện nhấp vào giỏ hàng
-                cartItemCount = 5, // Có thể thay bằng số lượng thực tế từ CartViewModel
+                cartItemCount = cartState.carts?.cartItems?.count(), // Có thể thay bằng số lượng thực tế từ CartViewModel
                 onCartPositioned = { position ->
                     cartButtonPosition = position
                 }

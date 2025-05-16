@@ -59,7 +59,7 @@ fun OrderItemRow(item: OrderItem, onNavigateWhenClickImage: (Long) -> Unit = {})
         Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(item.productName, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(item.productDescription, color = Color.Gray, fontSize = 12.sp)
+            Text(item.productDescription, color = Color.Gray, fontSize = 12.sp,maxLines =2)
             if(item.quantity > 0) {
                 Text("x${item.quantity}", color = Color.Gray, fontSize = 12.sp)
             }
