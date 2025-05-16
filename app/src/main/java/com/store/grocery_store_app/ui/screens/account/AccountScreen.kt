@@ -147,28 +147,10 @@ fun AccountScreen(
                     onClick = onNavigateToFavoriteProducts
                 ),
                 AccountMenuItem(
-                    icon = Icons.Default.Star,
-                    title = "Các đánh giá",
-                    subtitle = "Quản lý đánh giá của bạn",
-                    onClick = { /* TODO: Navigate to Reviews */ }
-                ),
-                AccountMenuItem(
                     icon = Icons.Default.Edit,
                     title = "Chỉnh sửa hồ sơ",
                     subtitle = "Cập nhật thông tin cá nhân",
                     onClick = { onNavigateToProfile() }
-                ),
-                AccountMenuItem(
-                    icon = Icons.Default.Settings,
-                    title = "Cài đặt",
-                    subtitle = "Tùy chọn ứng dụng",
-                    onClick = { /* TODO: Navigate to Settings */ }
-                ),
-                AccountMenuItem(
-                    icon = Icons.Default.ExitToApp,
-                    title = "Đăng xuất",
-                    subtitle = "Thoát khỏi tài khoản",
-                    onClick = { authViewModel.logout() }
                 )
             )
 
