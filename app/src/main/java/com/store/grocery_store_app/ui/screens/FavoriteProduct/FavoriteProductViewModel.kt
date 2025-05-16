@@ -136,4 +136,8 @@ class FavoriteProductViewModel @Inject constructor(private val favouriteReposito
         _state.update { it.copy(showLoginRequired = false) }
     }
 
+    fun clearError() {
+        _state.update { it.copy(error = null) }
+    }
+
 }

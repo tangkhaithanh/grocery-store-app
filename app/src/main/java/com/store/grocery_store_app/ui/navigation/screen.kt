@@ -117,4 +117,6 @@ sealed class Screen(val route: String) {
             return "vnpay/$totalAmount/$productJson/$addressJson/$voucherJson"
         }
     }
+
+    object FavoriteProducts : Screen("favorite_products")
 }

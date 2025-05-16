@@ -46,6 +46,7 @@ import com.store.grocery_store_app.utils.AuthPurpose
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.LiveData
+import com.store.grocery_store_app.ui.screens.FavoriteProduct.FavoriteProductScreen
 import com.store.grocery_store_app.ui.screens.address.SelectAddressScreen
 import com.store.grocery_store_app.ui.screens.vnpay.VnPayOnlyScreen
 
@@ -506,6 +507,9 @@ fun AuthNavGraph(
                 },
                 onNavigateToAddress = {
                     navController.navigate(Screen.Address.route)
+                },
+                onNavigateToFavoriteProducts = {
+                    navController.navigate(Screen.FavoriteProducts.route)
                 }
             )
         }
@@ -576,6 +580,20 @@ fun AuthNavGraph(
                 }
             )
         }
+
+
+        composable(Screen.FavoriteProducts.route) {
+            FavoriteProductScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToProductDetails = { productId ->
+                    navController.navigate(Screen.ProductDetails.createRoute(productId))
+                }
+            )
+        }
+
+
     }
 }
 

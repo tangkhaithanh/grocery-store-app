@@ -41,6 +41,7 @@ fun AccountScreen(
     onNavigateToOrder: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToAddress: () -> Unit = {},
+    onNavigateToFavoriteProducts: () -> Unit = {},
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by authViewModel.authState.collectAsState()
@@ -143,7 +144,7 @@ fun AccountScreen(
                     icon = Icons.Default.Favorite,
                     title = "Sản phẩm yêu thích",
                     subtitle = "Xem các sản phẩm đã lưu",
-                    onClick = { /* TODO: Navigate to Favorites */ }
+                    onClick = onNavigateToFavoriteProducts
                 ),
                 AccountMenuItem(
                     icon = Icons.Default.Star,
